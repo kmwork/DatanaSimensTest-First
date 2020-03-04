@@ -29,7 +29,7 @@ public class DatanaSimensTest {
 
             String dirConf = System.getProperty(SYS_DIR_PROP, DIR_DEFAULT);
             File f = new File(dirConf + File.separator + CONF_FILE_NAME);
-            if (!f.isFile() || f.exists()) {
+            if (!f.isFile() || !f.exists()) {
                 log.error("Файл не найден: " + f.getAbsolutePath());
                 System.exit(-100);
             }

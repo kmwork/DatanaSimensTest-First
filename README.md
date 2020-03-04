@@ -7,7 +7,7 @@
 ## Как пользоваться
 после сборки мавеном, запуск:
 
-`java -jar target/Siemens-K4-1.0-SNAPSHOT.jar -Dapp.dir=<путь к папке config>`
+`java -jar target/Siemens-K4-1.0-SNAPSHOT-jar-with-dependencies.jar -Dapp.dir=<путь к папке config>`
 
 
 

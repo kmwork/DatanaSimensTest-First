@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Properties;
-import java.util.Set;
 
 @Slf4j
 public class ValueParser {
@@ -28,17 +27,17 @@ public class ValueParser {
     }
     public static int parseInt(String strValue, String userNameField) throws AppException {
         log.debug(PREFIX_LOG + ": parse as Int for Field [" + userNameField + "] = " + strValue);
-        String args = userNameField + strValue;
+        String args = userNameField + "= " + strValue;
         if (StringUtils.isEmpty(strValue)) {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
         }
 
         try {
-            int value = Integer.parseInt(strValue.toString().trim());
+            int value = Integer.parseInt(strValue.trim());
             log.debug(PREFIX_LOG + ": success parsing: [" + userNameField + "] = " + value);
             return value;
         } catch (NumberFormatException ex) {
-            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "не верное целое число", args, null);
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "не верное целое число", args, ex);
         }
 
     }

@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Properties;
@@ -29,7 +28,7 @@ public class DatanaSimensTest {
             System.setProperty("file.encoding", ENCODING);
 
             String dirConf = System.getProperty(SYS_DIR_PROP, DIR_DEFAULT);
-            File f = new File(dirConf + File.separator + "CONF_FILE_NAME");
+            File f = new File(dirConf + File.separator + CONF_FILE_NAME);
             if (!f.isFile() || f.exists()) {
                 log.error("Файл не найден: " + f.getAbsolutePath());
                 System.exit(-100);

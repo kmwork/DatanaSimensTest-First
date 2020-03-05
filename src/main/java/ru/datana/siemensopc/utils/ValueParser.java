@@ -3,6 +3,7 @@ package ru.datana.siemensopc.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 @Slf4j
@@ -44,6 +45,22 @@ public class ValueParser {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "не верное целое число", args, ex);
         }
 
+    }
+
+
+    public static <EN extends Enum<EN>> EN readEnum(Properties p, String userNameField, Class<EN> enumClazz, EN[] allEnumValues) throws AppException {
+        String args = "as enum : " + userNameField + " = '" + userNameField + "'";
+        if (!enumClazz.isEnum()) {
+            throw new AppException(TypeException.SYSTEM_ERROR, " не верно указан тип " + enumClazz.getCanonicalName(), args, null);
+        }
+        String strValue = readPropAsText(p, userNameField);
+        try {
+            EN value = Enum.valueOf(enumClazz, userNameField);
+            log.debug(PREFIX_LOG + ": success as enum: [" + userNameField + "] = " + value);
+            return value;
+        } catch (IllegalArgumentException ex) {
+            throw new AppException(TypeException.SYSTEM_ERROR, " не верно указано значение для перечениления " + enumClazz.getCanonicalName() + " варианты = " + Arrays.toString(allEnumValues), args, ex);
+        }
     }
 
 

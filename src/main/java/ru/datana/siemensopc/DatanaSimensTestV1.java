@@ -53,7 +53,7 @@ public class DatanaSimensTestV1 {
             int intOffset = ValueParser.parseInt(p, "offset");
             int intSleep = ValueParser.parseInt(p, "step.time.ms");
             int intLoopCount = ValueParser.parseInt(p, "loop.count");
-            int intAreaNumber = ValueParser.parseInt(p, "area.number");
+            int intS7DBNumber = ValueParser.parseInt(p, "s7.db.number");
 
             int successCount = 0;
             int errorCount = 0;
@@ -69,7 +69,7 @@ public class DatanaSimensTestV1 {
                                     .build();
 
                     //Read from DB100 10 bytes
-                    byte[] bs = connector.read(daveArea, intAreaNumber, intBytes, intOffset);
+                    byte[] bs = connector.read(daveArea, intS7DBNumber, intBytes, intOffset);
                     successCount++;
                     log.info("[Data: Шаг = " + step + ", Успешных шагов = " + successCount + " ]" + Arrays.toString(bs));
                     Thread.sleep(intSleep);

@@ -28,6 +28,7 @@ package ru.datana.siemensopc;
 import Moka7.*;
 import com.github.s7connector.api.DaveArea;
 import lombok.extern.slf4j.Slf4j;
+import ru.datana.siemensopc.moka.contants.EnumS7Area;
 import ru.datana.siemensopc.utils.FormatUtils;
 import ru.datana.siemensopc.utils.ValueParser;
 
@@ -57,7 +58,6 @@ public class DatanaSimensTestMoka7 {
     private static String IpAddress = "";
     private static int Rack = 0; // Default 0 for S7300
     private static int Slot = 2; // Default 2 for S7300 
-    private static int DBSample = 1; // Sample DB that must be present in the CPU
     private static int DataToMove; // Data size to read/write
     private static int CurrentStatus = S7.S7CpuStatusUnknown;
 
@@ -108,34 +108,34 @@ public class DatanaSimensTestMoka7 {
         TestEnd(Result);
     }
 
-    public static boolean DBGet() {
-        IntByRef SizeRead = new IntByRef(0);
+    public static boolean readDataS7(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
+        IntByRef SizeRead = new IntByRef(sizeRead);
         TestBegin("DBGet()");
-        int Result = Client.DBGet(DBSample, Buffer, SizeRead);
+        int Result = Client.DBGet(intS7DBNumber, Buffer, SizeRead);
         TestEnd(Result);
         if (Result == 0) {
             DataToMove = SizeRead.Value; // Stores DB size for next test
-            log.info("DB " + DBSample + " - Size read " + DataToMove + " bytes");
+            log.info("DB " + intS7DBNumber + " - Size read " + DataToMove + " bytes");
             FormatUtils.hexDump(Buffer, DataToMove);
             return true;
         }
         return false;
     }
 
-    public static void DBRead() {
-        TestBegin("ReadArea()");
-        int Result = Client.ReadArea(S7.S7AreaDB, DBSample, 0, DataToMove, Buffer);
+    public static void DBRead(EnumS7Area s7Area, int intS7DBNumber) {
+        TestBegin("Чтение данных для s7Area = " + s7Area.getUserDesc());
+        int Result = Client.ReadArea(s7Area.getS7AreaCode(), intS7DBNumber, 0, DataToMove, Buffer);
         if (Result == 0) {
-            log.info("DB " + DBSample + " succesfully read using size reported by DBGet()");
+            log.info("DB " + intS7DBNumber + " succesfully read using size reported by DBGet()");
         }
         TestEnd(Result);
     }
 
-    public static void DBWrite() {
-        TestBegin("WriteArea()");
-        int Result = Client.WriteArea(S7.S7AreaDB, DBSample, 0, DataToMove, Buffer);
+    public static void DBWrite(EnumS7Area s7Area, int intS7DBNumber) {
+        TestBegin("Запись данных для s7Area = " + s7Area.getUserDesc());
+        int Result = Client.WriteArea(s7Area.getS7AreaCode(), intS7DBNumber, 0, DataToMove, Buffer);
         if (Result == 0) {
-            log.info("DB " + DBSample + " succesfully written using size reported by DBGet()");
+            log.info("DB " + intS7DBNumber + " succesfully written using size reported by DBGet()");
         }
         TestEnd(Result);
     }
@@ -143,13 +143,13 @@ public class DatanaSimensTestMoka7 {
     /**
      * Performs read and write on a given DB
      */
-    public static void DBPlay() {
+    public static void DBPlay(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
         // We use DBSample (default = DB 1) as DB Number
         // modify it if it doesn't exists into the CPU.
-        if (DBGet()) {
-            DBRead();
+        if (readDataS7(s7Area, intS7DBNumber, sizeRead)) {
+            DBRead(s7Area, intS7DBNumber);
             if (MakeAllTests)
-                DBWrite();
+                DBWrite(s7Area, intS7DBNumber);
         }
     }
 
@@ -310,7 +310,7 @@ public class DatanaSimensTestMoka7 {
     }
 
 
-    public static void PerformTests() {
+    public static void PerformTests(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
         GetSysInfo();
         GetProtectionScheme();
         GetDateAndTime();
@@ -321,7 +321,7 @@ public class DatanaSimensTestMoka7 {
         if (MakeAllTests)
             RunStop();
         BlockInfo(S7.Block_SFC, 1); // Get SFC 1 info (always present in a CPU)
-        DBPlay();
+        DBPlay(s7Area, intS7DBNumber, sizeRead);
         Summary();
     }
 
@@ -357,7 +357,8 @@ public class DatanaSimensTestMoka7 {
             int intLoopCount = ValueParser.parseInt(p, "loop.count");
             int intAreaNumber = ValueParser.parseInt(p, "area.number");
             String appMode = ValueParser.readPropAsText(p, APP_WORK_OPTION);
-
+            EnumS7Area enumS7Area = ValueParser.readEnum(p, "s7.area", EnumS7Area.class, EnumS7Area.values());
+            int intS7DBNumber = ValueParser.parseInt(p, "s7.db.number");
             int successCount = 0;
             int errorCount = 0;
 
@@ -369,11 +370,11 @@ public class DatanaSimensTestMoka7 {
             if (Connect()) {
                 switch (appMode) {
                     case "TEST": {
-                        PerformTests();
+                        PerformTests(enumS7Area, intS7DBNumber, intBytes);
                         break;
                     }
                     case "READ": {
-                        danataReadTest();
+                        danataReadTest(enumS7Area, intS7DBNumber, intOffset, intBytes);
                         break;
                     }
                     default: {
@@ -390,14 +391,14 @@ public class DatanaSimensTestMoka7 {
         log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
     }
 
-    private static void danataReadTest() {
+    private static void danataReadTest(EnumS7Area enumS7Area, int intS7DBNumber, int intOffset, int intBytes) {
 
         TestBegin("danataReadTest()");
-        int Result = Client.ReadArea(S7.S7AreaDB, DBSample, 0, DataToMove, Buffer);
-        if (Result == 0) {
-            log.info("DB " + DBSample + " succesfully read using size reported by DBGet()");
+        boolean isSuccess = readDataS7(enumS7Area, intS7DBNumber, intBytes);
+        if (isSuccess) {
+            log.info("[Чтение данных] DB " + intS7DBNumber + " Упешно прочитано");
         }
-        TestEnd(Result);
+        TestEnd(isSuccess ? 0 : 1);
     }
 
 }

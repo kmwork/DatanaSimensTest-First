@@ -86,6 +86,7 @@ public class DatanaSimensTestMoka7 {
 
         int Result = clientS7.GetAgBlockInfo(BlockType, BlockNumber, Block);
         if (Result == 0) {
+            log.info(" ====================== Block Flags ======================");
             log.info("Block Flags     : " + Integer.toBinaryString(Block.BlkFlags()));
             log.info("Block Number    : " + Block.BlkNumber());
             log.info("Block Languege  : " + Block.BlkLang());
@@ -101,6 +102,7 @@ public class DatanaSimensTestMoka7 {
             SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy");
             log.info("Code Date       : " + ft.format(Block.CodeDate()));
             log.info("Interface Date  : " + ft.format(Block.IntfDate()));
+            log.info(" ______________________ Block Flags  (конец) ______________________");
         }
         TestEnd(Result);
     }

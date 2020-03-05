@@ -54,13 +54,13 @@ public class ValueParser {
 
 
     public static <EN extends Enum<EN>> EN readEnum(Properties p, String userNameField, Class<EN> enumClazz, EN[] allEnumValues) throws AppException {
-        String args = "as enum : " + userNameField + " = '" + userNameField + "'";
+        String strValue = readPropAsText(p, userNameField);
+        String args = "as enum : " + userNameField + " = '" + strValue + "'";
         if (!enumClazz.isEnum()) {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно указан тип " + enumClazz.getCanonicalName(), args, null);
         }
-        String strValue = readPropAsText(p, userNameField);
         try {
-            EN value = Enum.valueOf(enumClazz, userNameField);
+            EN value = Enum.valueOf(enumClazz, strValue);
             log.debug(PREFIX_LOG + ": success as enum: [" + userNameField + "] = " + value);
             return value;
         } catch (IllegalArgumentException ex) {
@@ -70,8 +70,8 @@ public class ValueParser {
 
 
     public static boolean readBoolean(Properties p, String userNameField) throws AppException {
-        String args = "as boolean : " + userNameField + " = '" + userNameField + "'";
         String strBoolean = readPropAsText(p, userNameField, true);
+        String args = "as boolean : " + userNameField + " = '" + strBoolean + "'";
         if (!strBoolean.equals("TRUE") && strBoolean.equals("FALSE"))
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно булево значение  TRUE/FALSE", args, null);
         return strBoolean.equals("TRUE");

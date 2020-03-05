@@ -27,7 +27,7 @@ package ru.datana.siemensopc;
 
 import executer.IExecutor;
 import executer.Moka7Executer;
-import executer.S7Executor;
+import executer.S7GithubExecutor;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppLibraryType;
@@ -41,6 +41,7 @@ public class DatanaSimensTestApp {
 
     public static void main(String[] args) {
         log.info(AppConts.APP_LOG_PREFIX + "================ Запуск  ================. Аргументы = " + Arrays.toString(args));
+        log.info(AppConts.APP_LOG_PREFIX + "Версия: V2");
         try {
             AppOptions appOptions = new AppOptions();
             try {
@@ -50,12 +51,12 @@ public class DatanaSimensTestApp {
                 return;
             }
             AppLibraryType type = appOptions.getAppLibraryType();
-            log.info(" ВЫБРАН АЛГОРИТМ " + type);
+            log.info(AppConts.APP_LOG_PREFIX + " ВЫБРАН АЛГОРИТМ " + type);
             IExecutor executer = null;
             if (type == AppLibraryType.MOKA7)
                 executer = new Moka7Executer(appOptions);
             else if (type == AppLibraryType.S7)
-                executer = new S7Executor(appOptions);
+                executer = new S7GithubExecutor(appOptions);
             else {
                 log.error(AppConts.ERROR_LOG_PREFIX + " Не определен аргорим программы = " + type);
                 System.exit(-100);

@@ -10,10 +10,10 @@ import ru.datana.siemensopc.utils.AppException;
 import java.util.Arrays;
 
 @Slf4j
-public class S7Executor implements IExecutor {
+public class S7GithubExecutor implements IExecutor {
     private AppOptions appOptions;
 
-    public S7Executor(AppOptions appOptions) {
+    public S7GithubExecutor(AppOptions appOptions) {
         this.appOptions = appOptions;
     }
 

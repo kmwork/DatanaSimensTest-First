@@ -18,7 +18,7 @@ public class ValueParser {
     public static String readPropAsText(Properties p, String userNameField) throws AppException {
         String strValue = p.getProperty(userNameField);
         if (StringUtils.isEmpty(strValue)) {
-            String args = userNameField + strValue;
+            String args = userNameField + " = '" + strValue + "'";
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
         }
 
@@ -29,7 +29,7 @@ public class ValueParser {
 
     public static int parseInt(String strValue, String userNameField) throws AppException {
         log.debug(PREFIX_LOG + ": parse as Int for Field [" + userNameField + "] = " + strValue);
-        String args = userNameField + "= " + strValue;
+        String args = userNameField + " = '" + strValue + "'";
         if (StringUtils.isEmpty(strValue)) {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
         }

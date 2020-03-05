@@ -53,9 +53,10 @@ public class Moka7Executor implements IExecutor {
         log.info(prefix + " === Время выполнения = " + (System.currentTimeMillis() - Elapsed) + " ms");
     }
 
-    private void Error(String functionName, int erorrCode) {
+    private void Error(String functionName, int errorCode) {
         String prefix = prefixMethod(functionName) + "[Error] ";
-        log.error(prefix + " Код ошибки = " + erorrCode + ". Описание: " + S7Client.ErrorText(erorrCode));
+        int sysErrorCode = clientS7.LastError;
+        log.error(prefix + " Код ошибки = " + errorCode + ". Системный код ошибки = +" + sysErrorCode + ". Описание: " + S7Client.ErrorText(sysErrorCode));
     }
 
     private void BlockInfo(int BlockType, int BlockNumber) {

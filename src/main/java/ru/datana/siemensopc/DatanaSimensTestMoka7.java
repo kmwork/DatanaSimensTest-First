@@ -29,7 +29,6 @@ import Moka7.*;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.config.EnumAppWorkMode;
-import ru.datana.siemensopc.moka.contants.EnumS7Area;
 import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.FormatUtils;
 
@@ -122,16 +121,16 @@ public class DatanaSimensTestMoka7 {
 
     private void DBRead() {
         TestBegin("Чтение данных для s7Area = " + appOptions.getEnumS7Area().getUserDesc());
-        int Result = clientS7.ReadArea(appOptions.getEnumS7Area().getS7AreaCode(), appOptions.getIntS7DBNumber(), 0, DataToMove, Buffer);
+        int Result = clientS7.ReadArea(appOptions.getEnumS7Area().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
         if (Result == 0) {
             log.info(SUCCESS_LOG_PREFIX + "Прочитано из getEnumS7Area = " + appOptions.getEnumS7Area().getUserDesc());
         }
         TestEnd(Result);
     }
 
-    private void DBWrite(EnumS7Area s7Area, int intS7DBNumber) {
-        TestBegin("Запись данных для s7Area = " + s7Area.getUserDesc());
-        int Result = clientS7.WriteArea(s7Area.getS7AreaCode(), intS7DBNumber, 0, DataToMove, Buffer);
+    private void DBWrite() {
+        TestBegin("Запись данных для s7Area = " + appOptions.getEnumS7Area().getUserDesc());
+        int Result = clientS7.WriteArea(appOptions.getEnumS7Area().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
         if (Result == 0) {
             log.info(SUCCESS_LOG_PREFIX + "Записано из getEnumS7Area = " + appOptions.getEnumS7Area().getUserDesc());
         }
@@ -141,13 +140,13 @@ public class DatanaSimensTestMoka7 {
     /**
      * Performs read and write on a given DB
      */
-    private void DBPlay(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
+    private void DBPlay() {
         // We use DBSample (default = DB 1) as DB Number
         // modify it if it doesn't exists into the CPU.
         if (readDataS7()) {
             DBRead();
             if (appOptions.isAppMakeAllTests())
-                DBWrite(s7Area, intS7DBNumber);
+                DBWrite();
         }
     }
 
@@ -199,12 +198,12 @@ public class DatanaSimensTestMoka7 {
         switch (CurrentStatus) {
             case S7.S7CpuStatusRun:
                 DoStop();
-                Delay(1000);
+                Delay();
                 DoRun();
                 break;
             case S7.S7CpuStatusStop:
                 DoRun();
-                Delay(1000);
+                Delay();
                 DoStop();
         }
     }
@@ -340,31 +339,22 @@ public class DatanaSimensTestMoka7 {
     }
 
     public void run() {
-        log.info(APP_LOG_PREFIX + "================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
         try {
-
-
-            int successCount = 0;
-            int errorCount = 0;
-
+            successCount = 0;
+            failedCount = 0;
 
 
             if (Connect()) {
-                switch (appOptions.getAppWorkMode()) {
-                    case EnumAppWorkMode.TEST: {
-                        performTests();
-                        break;
-                    }
-                    case EnumAppWorkMode.READ: {
-                        danataReadTest();
-                        break;
-                    }
-                    default: {
-                        log.error(ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
-                    }
+                if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST)
+                    performTests();
+                else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)
+                    danataReadTest();
+                else
+                    log.error(ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
 
-                }
+
             }
+
 
         } catch (Exception e) {
             log.error(ERROR_LOG_PREFIX + "Аварийное завершение программы: ", e);
@@ -373,7 +363,7 @@ public class DatanaSimensTestMoka7 {
         log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
     }
 
-    private static void danataReadTest() {
+    private void danataReadTest() {
 
         TestBegin("danataReadTest()");
         boolean isSuccess = readDataS7();

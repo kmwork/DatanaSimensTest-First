@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 @Slf4j
-public class DatanaSimensTest {
+public class DatanaSimensTestV1 {
     private static final String CONF_FILE_NAME = "datana_siemens.properties";
     private static final String SYS_DIR_PROP = "app.dir";
     private static final String ENCODING = "UTF8";
@@ -25,7 +25,7 @@ public class DatanaSimensTest {
 
     public static void main(String[] args) {
 
-        log.info("[DatanaSimensTest] ================ Запуск ================. Аргументы = " + Arrays.toString(args));
+        log.info("[DatanaSimensTest] ================ Запуск (Старая версия V1) ================. Аргументы = " + Arrays.toString(args));
         try {
             String dirConf = ValueParser.readPropAsText(System.getProperties(), SYS_DIR_PROP);
 

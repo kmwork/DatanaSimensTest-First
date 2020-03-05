@@ -57,7 +57,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ru.datana.siemensopc.DatanaSimensTest</mainClass>
+                            <mainClass>ru.datana.siemensopc.DatanaSimensTestV1</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

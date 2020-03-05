@@ -22,9 +22,11 @@ public class ValueParser {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
         }
 
-        log.info(PREFIX_LOG + ": Чтение значение [" + userNameField + "] = " + strValue);
+        String result = strValue.trim().toUpperCase();
 
-        return strValue;
+        log.info(PREFIX_LOG + ": Чтение значение [" + userNameField + "] = " + result);
+
+        return result;
     }
 
     public static int parseInt(String strValue, String userNameField) throws AppException {

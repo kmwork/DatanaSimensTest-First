@@ -45,19 +45,21 @@ public class DatanaSimensTestMoka7 {
 
     // If MakeAllTests = true, also DBWrite and Run/Stop tests will be performed
     private static final boolean MakeAllTests = true;
+    private static final String APP_WORK_OPTION = "app.work.mode";
+    private static final String ERROR_LOG_PREFIX = "[App-Error] ";
+    private static final String APP_LOG_PREFIX = "[App-Danata-Mock7] ";
 
     private static long Elapsed;
     private static byte[] Buffer = new byte[65536]; // 64K buffer (maximum for S7400 systems)
     private static final S7Client Client = new S7Client();
-    private static int ok = 0;
-    private static int ko = 0;
+    private static int successCount = 0;
+    private static int failedCount = 0;
     private static String IpAddress = "";
     private static int Rack = 0; // Default 0 for S7300
     private static int Slot = 2; // Default 2 for S7300 
     private static int DBSample = 1; // Sample DB that must be present in the CPU
     private static int DataToMove; // Data size to read/write
     private static int CurrentStatus = S7.S7CpuStatusUnknown;
-
 
 
     static void TestBegin(String FunctionName) {
@@ -70,15 +72,15 @@ public class DatanaSimensTestMoka7 {
 
     static void TestEnd(int Result) {
         if (Result != 0) {
-            ko++;
+            failedCount++;
             Error(Result);
         } else
-            ok++;
+            successCount++;
         log.info("Execution time " + (System.currentTimeMillis() - Elapsed) + " ms");
     }
 
-    static void Error(int Code) {
-        log.info(S7Client.ErrorText(Code));
+    static void Error(int erorrCode) {
+        log.error("[S7Client-Error] Код ошибки = " + S7Client.ErrorText(erorrCode));
     }
 
     static void BlockInfo(int BlockType, int BlockNumber) {
@@ -289,9 +291,9 @@ public class DatanaSimensTestMoka7 {
     public static void Summary() {
         log.info("");
         log.info("+================================================================");
-        log.info("Tests performed : " + (ok + ko));
-        log.info("Passed          : " + ok);
-        log.info("Failed          : " + ko);
+        log.info("Tests performed : " + (successCount + failedCount));
+        log.info("Passed          : " + successCount);
+        log.info("Failed          : " + failedCount);
         log.info("+================================================================");
     }
 
@@ -324,7 +326,7 @@ public class DatanaSimensTestMoka7 {
     }
 
     public static void main(String[] args) throws IOException {
-        log.info("[DatanaSimensTestMoka7] ================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
+        log.info(APP_LOG_PREFIX + "================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
         try {
             String dirConf = ValueParser.readPropAsText(System.getProperties(), SYS_DIR_PROP);
             String fileEncoding = ValueParser.readPropAsText(System.getProperties(), ENCODING_PROP);
@@ -354,7 +356,7 @@ public class DatanaSimensTestMoka7 {
             int intSleep = ValueParser.parseInt(p, "step.time.ms");
             int intLoopCount = ValueParser.parseInt(p, "loop.count");
             int intAreaNumber = ValueParser.parseInt(p, "area.number");
-            boolean isDebug = "true".equalsIgnoreCase(ValueParser.readPropAsText(p, "debug.boolean"));
+            String appMode = ValueParser.readPropAsText(p, APP_WORK_OPTION);
 
             int successCount = 0;
             int errorCount = 0;
@@ -365,14 +367,37 @@ public class DatanaSimensTestMoka7 {
             IpAddress = ipHost;
 
             if (Connect()) {
-                if (isDebug) PerformTests();
+                switch (appMode) {
+                    case "TEST": {
+                        PerformTests();
+                        break;
+                    }
+                    case "READ": {
+                        danataReadTest();
+                        break;
+                    }
+                    default: {
+                        log.error(ERROR_LOG_PREFIX + "Не определен режим работы: " + APP_WORK_OPTION + " = '" + appMode + "'");
+                    }
+
+                }
             }
 
         } catch (Exception e) {
-            log.error("[App-Error: Аварийное завершение программы: ", e);
+            log.error(ERROR_LOG_PREFIX + "Аварийное завершение программы: ", e);
         }
 
-        log.info("[DatanaSimensTestMoka7] ********* Завершение программы (Версия Мока7)*********");
+        log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
+    }
+
+    private static void danataReadTest() {
+
+        TestBegin("danataReadTest()");
+        int Result = Client.ReadArea(S7.S7AreaDB, DBSample, 0, DataToMove, Buffer);
+        if (Result == 0) {
+            log.info("DB " + DBSample + " succesfully read using size reported by DBGet()");
+        }
+        TestEnd(Result);
     }
 
 }

@@ -16,18 +16,23 @@ public class ValueParser {
 
     }
 
-    public static String readPropAsText(Properties p, String userNameField) throws AppException {
+    public static String readPropAsText(Properties p, String userNameField, boolean toUpperCase) throws AppException {
         String strValue = p.getProperty(userNameField);
         if (StringUtils.isEmpty(strValue)) {
             String args = userNameField + " = '" + strValue + "'";
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
         }
 
-        String result = strValue.trim().toUpperCase();
+        String result = strValue.trim();
+        if (toUpperCase) result = result.toUpperCase();
 
         log.info(PREFIX_LOG + ": Чтение значение [" + userNameField + "] = " + result);
 
         return result;
+    }
+
+    public static String readPropAsText(Properties p, String userNameField) throws AppException {
+        return readPropAsText(p, userNameField, true);
     }
 
     public static int parseInt(String strValue, String userNameField) throws AppException {
@@ -51,7 +56,7 @@ public class ValueParser {
     public static <EN extends Enum<EN>> EN readEnum(Properties p, String userNameField, Class<EN> enumClazz, EN[] allEnumValues) throws AppException {
         String args = "as enum : " + userNameField + " = '" + userNameField + "'";
         if (!enumClazz.isEnum()) {
-            throw new AppException(TypeException.SYSTEM_ERROR, " не верно указан тип " + enumClazz.getCanonicalName(), args, null);
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно указан тип " + enumClazz.getCanonicalName(), args, null);
         }
         String strValue = readPropAsText(p, userNameField);
         try {
@@ -59,9 +64,16 @@ public class ValueParser {
             log.debug(PREFIX_LOG + ": success as enum: [" + userNameField + "] = " + value);
             return value;
         } catch (IllegalArgumentException ex) {
-            throw new AppException(TypeException.SYSTEM_ERROR, " не верно указано значение для перечениления " + enumClazz.getCanonicalName() + " варианты = " + Arrays.toString(allEnumValues), args, ex);
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно указано значение для перечениления " + enumClazz.getCanonicalName() + " варианты = " + Arrays.toString(allEnumValues), args, ex);
         }
     }
 
 
+    public static boolean readBoolean(Properties p, String userNameField) throws AppException {
+        String args = "as boolean : " + userNameField + " = '" + userNameField + "'";
+        String strBoolean = readPropAsText(p, userNameField, true);
+        if (!strBoolean.equals("TRUE") && strBoolean.equals("FALSE"))
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно булево значение  TRUE/FALSE", args, null);
+        return strBoolean.equals("TRUE");
+    }
 }

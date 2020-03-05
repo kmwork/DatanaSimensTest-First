@@ -26,43 +26,41 @@ package ru.datana.siemensopc;
  */
 
 import Moka7.*;
-import com.github.s7connector.api.DaveArea;
 import lombok.extern.slf4j.Slf4j;
+import ru.datana.siemensopc.config.AppOptions;
+import ru.datana.siemensopc.config.EnumAppWorkMode;
 import ru.datana.siemensopc.moka.contants.EnumS7Area;
+import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.FormatUtils;
-import ru.datana.siemensopc.utils.ValueParser;
 
-import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Properties;
 
 @Slf4j
 public class DatanaSimensTestMoka7 {
-    private static final String CONF_FILE_NAME = "datana_siemens.properties";
-    private static final String SYS_DIR_PROP = "app.dir";
-    private static final String ENCODING_PROP = "file.encoding";
 
-    // If MakeAllTests = true, also DBWrite and Run/Stop tests will be performed
-    private static final boolean MakeAllTests = true;
-    private static final String APP_WORK_OPTION = "app.work.mode";
-    private static final String ERROR_LOG_PREFIX = "[App-Error] ";
+
+    private static final String SUCCESS_LOG_PREFIX = "[App-Ошибка] ";
+    private static final String ERROR_LOG_PREFIX = "[App-Успешно] ";
     private static final String APP_LOG_PREFIX = "[App-Danata-Mock7] ";
 
-    private static long Elapsed;
-    private static byte[] Buffer = new byte[65536]; // 64K buffer (maximum for S7400 systems)
-    private static final S7Client Client = new S7Client();
-    private static int successCount = 0;
-    private static int failedCount = 0;
-    private static String IpAddress = "";
-    private static int Rack = 0; // Default 0 for S7300
-    private static int Slot = 2; // Default 2 for S7300 
-    private static int DataToMove; // Data size to read/write
-    private static int CurrentStatus = S7.S7CpuStatusUnknown;
+    private long Elapsed;
+    private byte[] Buffer = new byte[65536]; // 64K buffer (maximum for S7400 systems)
+    private final S7Client clientS7 = new S7Client();
+    private int successCount = 0;
+    private int failedCount = 0;
+    private int DataToMove; // Data size to read/write
+    private int CurrentStatus = S7.S7CpuStatusUnknown;
+
+    private final AppOptions appOptions;
+
+    public DatanaSimensTestMoka7(AppOptions appOptions) {
+        this.appOptions = appOptions;
+    }
 
 
-    static void TestBegin(String FunctionName) {
+    private void TestBegin(String FunctionName) {
         log.info("");
         log.info("+================================================================");
         log.info("| " + FunctionName);
@@ -70,7 +68,7 @@ public class DatanaSimensTestMoka7 {
         Elapsed = System.currentTimeMillis();
     }
 
-    static void TestEnd(int Result) {
+    private void TestEnd(int Result) {
         if (Result != 0) {
             failedCount++;
             Error(Result);
@@ -79,15 +77,15 @@ public class DatanaSimensTestMoka7 {
         log.info("Execution time " + (System.currentTimeMillis() - Elapsed) + " ms");
     }
 
-    static void Error(int erorrCode) {
+    private void Error(int erorrCode) {
         log.error("[S7Client-Error] Код ошибки = " + S7Client.ErrorText(erorrCode));
     }
 
-    static void BlockInfo(int BlockType, int BlockNumber) {
+    private void BlockInfo(int BlockType, int BlockNumber) {
         S7BlockInfo Block = new S7BlockInfo();
         TestBegin("GetAgBlockInfo()");
 
-        int Result = Client.GetAgBlockInfo(BlockType, BlockNumber, Block);
+        int Result = clientS7.GetAgBlockInfo(BlockType, BlockNumber, Block);
         if (Result == 0) {
             log.info("Block Flags     : " + Integer.toBinaryString(Block.BlkFlags()));
             log.info("Block Number    : " + Block.BlkNumber());
@@ -108,34 +106,34 @@ public class DatanaSimensTestMoka7 {
         TestEnd(Result);
     }
 
-    public static boolean readDataS7(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
-        IntByRef SizeRead = new IntByRef(sizeRead);
+    private boolean readDataS7() {
+        IntByRef SizeRead = new IntByRef(appOptions.getIntBytes());
         TestBegin("DBGet()");
-        int Result = Client.DBGet(intS7DBNumber, Buffer, SizeRead);
+        int Result = clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
         TestEnd(Result);
         if (Result == 0) {
             DataToMove = SizeRead.Value; // Stores DB size for next test
-            log.info("DB " + intS7DBNumber + " - Size read " + DataToMove + " bytes");
+            log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + DataToMove + " bytes");
             FormatUtils.hexDump(Buffer, DataToMove);
             return true;
         }
         return false;
     }
 
-    public static void DBRead(EnumS7Area s7Area, int intS7DBNumber) {
-        TestBegin("Чтение данных для s7Area = " + s7Area.getUserDesc());
-        int Result = Client.ReadArea(s7Area.getS7AreaCode(), intS7DBNumber, 0, DataToMove, Buffer);
+    private void DBRead() {
+        TestBegin("Чтение данных для s7Area = " + appOptions.getEnumS7Area().getUserDesc());
+        int Result = clientS7.ReadArea(appOptions.getEnumS7Area().getS7AreaCode(), appOptions.getIntS7DBNumber(), 0, DataToMove, Buffer);
         if (Result == 0) {
-            log.info("DB " + intS7DBNumber + " succesfully read using size reported by DBGet()");
+            log.info(SUCCESS_LOG_PREFIX + "Прочитано из getEnumS7Area = " + appOptions.getEnumS7Area().getUserDesc());
         }
         TestEnd(Result);
     }
 
-    public static void DBWrite(EnumS7Area s7Area, int intS7DBNumber) {
+    private void DBWrite(EnumS7Area s7Area, int intS7DBNumber) {
         TestBegin("Запись данных для s7Area = " + s7Area.getUserDesc());
-        int Result = Client.WriteArea(s7Area.getS7AreaCode(), intS7DBNumber, 0, DataToMove, Buffer);
+        int Result = clientS7.WriteArea(s7Area.getS7AreaCode(), intS7DBNumber, 0, DataToMove, Buffer);
         if (Result == 0) {
-            log.info("DB " + intS7DBNumber + " succesfully written using size reported by DBGet()");
+            log.info(SUCCESS_LOG_PREFIX + "Записано из getEnumS7Area = " + appOptions.getEnumS7Area().getUserDesc());
         }
         TestEnd(Result);
     }
@@ -143,27 +141,27 @@ public class DatanaSimensTestMoka7 {
     /**
      * Performs read and write on a given DB
      */
-    public static void DBPlay(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
+    private void DBPlay(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
         // We use DBSample (default = DB 1) as DB Number
         // modify it if it doesn't exists into the CPU.
-        if (readDataS7(s7Area, intS7DBNumber, sizeRead)) {
-            DBRead(s7Area, intS7DBNumber);
-            if (MakeAllTests)
+        if (readDataS7()) {
+            DBRead();
+            if (appOptions.isAppMakeAllTests())
                 DBWrite(s7Area, intS7DBNumber);
         }
     }
 
-    public static void Delay(int millisec) {
+    private void Delay() {
         try {
-            Thread.sleep(millisec);
+            Thread.sleep(appOptions.getIntStepPauseMS());
         } catch (InterruptedException e) {
         }
     }
 
-    public static void ShowStatus() {
+    public void ShowStatus() {
         IntByRef PlcStatus = new IntByRef(S7.S7CpuStatusUnknown);
         TestBegin("GetPlcStatus()");
-        int Result = Client.GetPlcStatus(PlcStatus);
+        int Result = clientS7.GetPlcStatus(PlcStatus);
         if (Result == 0) {
             System.out.print("PLC Status : ");
             switch (PlcStatus.Value) {
@@ -181,23 +179,23 @@ public class DatanaSimensTestMoka7 {
         TestEnd(Result);
     }
 
-    public static void DoRun() {
+    public void DoRun() {
         TestBegin("PlcHotStart()");
-        int Result = Client.PlcHotStart();
+        int Result = clientS7.PlcHotStart();
         if (Result == 0)
             log.info("PLC Started");
         TestEnd(Result);
     }
 
-    public static void DoStop() {
+    public void DoStop() {
         TestBegin("PlcStop()");
-        int Result = Client.PlcStop();
+        int Result = clientS7.PlcStop();
         if (Result == 0)
             log.info("PLC Stopped");
         TestEnd(Result);
     }
 
-    public static void RunStop() {
+    public void RunStop() {
         switch (CurrentStatus) {
             case S7.S7CpuStatusRun:
                 DoStop();
@@ -211,11 +209,11 @@ public class DatanaSimensTestMoka7 {
         }
     }
 
-    public static void GetSysInfo() {
+    public void GetSysInfo() {
         int Result;
         TestBegin("GetOrderCode()");
         S7OrderCode OrderCode = new S7OrderCode();
-        Result = Client.GetOrderCode(OrderCode);
+        Result = clientS7.GetOrderCode(OrderCode);
         if (Result == 0) {
             log.info("Order Code        : " + OrderCode.Code());
             log.info("Firmware version  : " + OrderCode.V1 + "." + OrderCode.V2 + "." + OrderCode.V3);
@@ -224,7 +222,7 @@ public class DatanaSimensTestMoka7 {
 
         TestBegin("GetCpuInfo()");
         S7CpuInfo CpuInfo = new S7CpuInfo();
-        Result = Client.GetCpuInfo(CpuInfo);
+        Result = clientS7.GetCpuInfo(CpuInfo);
         if (Result == 0) {
             log.info("Module Type Name  : " + CpuInfo.ModuleTypeName());
             log.info("Serial Number     : " + CpuInfo.SerialNumber());
@@ -236,7 +234,7 @@ public class DatanaSimensTestMoka7 {
 
         TestBegin("GetCpInfo()");
         S7CpInfo CpInfo = new S7CpInfo();
-        Result = Client.GetCpInfo(CpInfo);
+        Result = clientS7.GetCpInfo(CpInfo);
         if (Result == 0) {
             log.info("Max PDU Length    : " + CpInfo.MaxPduLength);
             log.info("Max connections   : " + CpInfo.MaxConnections);
@@ -246,25 +244,25 @@ public class DatanaSimensTestMoka7 {
         TestEnd(Result);
     }
 
-    public static void GetDateAndTime() {
+    public void GetDateAndTime() {
         Date PlcDateTime = new Date();
         TestBegin("GetPlcDateTime()");
-        int Result = Client.GetPlcDateTime(PlcDateTime);
+        int Result = clientS7.GetPlcDateTime(PlcDateTime);
         if (Result == 0)
             log.info("CPU Date/Time : " + PlcDateTime);
         TestEnd(Result);
     }
 
-    public static void SyncDateAndTime() {
+    public void SyncDateAndTime() {
         TestBegin("SetPlcSystemDateTime()");
-        int Result = Client.SetPlcSystemDateTime();
+        int Result = clientS7.SetPlcSystemDateTime();
         TestEnd(Result);
     }
 
-    public static void ReadSzl() {
+    public void ReadSzl() {
         S7Szl SZL = new S7Szl(1024);
         TestBegin("ReadSZL() - ID : 0x0011, IDX : 0x0000");
-        int Result = Client.ReadSZL(0x0011, 0x0000, SZL);
+        int Result = clientS7.ReadSZL(0x0011, 0x0000, SZL);
         if (Result == 0) {
             log.info("LENTHDR : " + SZL.LENTHDR);
             log.info("N_DR    : " + SZL.N_DR);
@@ -274,10 +272,10 @@ public class DatanaSimensTestMoka7 {
         TestEnd(Result);
     }
 
-    public static void GetProtectionScheme() {
+    public void GetProtectionScheme() {
         S7Protection Protection = new S7Protection();
         TestBegin("GetProtection()");
-        int Result = Client.GetProtection(Protection);
+        int Result = clientS7.GetProtection(Protection);
         if (Result == 0) {
             log.info("sch_schal : " + Protection.sch_schal);
             log.info("sch_par   : " + Protection.sch_par);
@@ -288,7 +286,7 @@ public class DatanaSimensTestMoka7 {
         TestEnd(Result);
     }
 
-    public static void Summary() {
+    public void Summary() {
         log.info("");
         log.info("+================================================================");
         log.info("Tests performed : " + (successCount + failedCount));
@@ -297,88 +295,72 @@ public class DatanaSimensTestMoka7 {
         log.info("+================================================================");
     }
 
-    public static boolean Connect() {
+    public boolean Connect() {
         TestBegin("ConnectTo()");
-        Client.SetConnectionType(S7.OP);
-        int Result = Client.ConnectTo(IpAddress, Rack, Slot);
+        clientS7.SetConnectionType(S7.OP);
+        int Result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
         if (Result == 0) {
-            log.info("Connected to   : " + IpAddress + " (Rack=" + Rack + ", Slot=" + Slot + ")");
-            log.info("PDU negotiated : " + Client.PDULength() + " bytes");
+            log.info("Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
+            log.info("PDU negotiated : " + clientS7.PDULength() + " bytes");
         }
         TestEnd(Result);
         return Result == 0;
     }
 
 
-    public static void PerformTests(EnumS7Area s7Area, int intS7DBNumber, int sizeRead) {
+    public void performTests() {
         GetSysInfo();
         GetProtectionScheme();
         GetDateAndTime();
-        if (MakeAllTests)
+        if (appOptions.isAppMakeAllTests())
             SyncDateAndTime();
         ReadSzl();
         ShowStatus();
-        if (MakeAllTests)
+        if (appOptions.isAppMakeAllTests())
             RunStop();
         BlockInfo(S7.Block_SFC, 1); // Get SFC 1 info (always present in a CPU)
-        DBPlay(s7Area, intS7DBNumber, sizeRead);
+        DBPlay();
         Summary();
     }
 
-    public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) {
+        log.info(APP_LOG_PREFIX + "================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
+        AppOptions appOptions = new AppOptions();
+        try {
+            appOptions.load();
+        } catch (AppException e) {
+            log.error("Ошибка чтения конфига", e);
+            return;
+        }
+        DatanaSimensTestMoka7 app = new DatanaSimensTestMoka7(appOptions);
+        app.run();
+
+        log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
+    }
+
+    public void run() {
         log.info(APP_LOG_PREFIX + "================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
         try {
-            String dirConf = ValueParser.readPropAsText(System.getProperties(), SYS_DIR_PROP);
-            String fileEncoding = ValueParser.readPropAsText(System.getProperties(), ENCODING_PROP);
 
-            File f = new File(dirConf, CONF_FILE_NAME);
-            if (!f.isFile() || !f.exists()) {
-                log.error("Файл не найден: " + f.getAbsolutePath());
-                System.exit(-100);
-            }
 
-            Properties p = new Properties();
-            try (Reader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), fileEncoding));) {
-                p.load(fileReader);
-            } catch (IOException ex) {
-                log.error("Не смог прочитать файл: " + f.getAbsolutePath(), ex);
-                System.exit(-200);
-            }
-
-            log.info("[CONFIG]" + p);
-            String ipHost = ValueParser.readPropAsText(p, "host");
-            String enumType = ValueParser.readPropAsText(p, "dave.area");
-            DaveArea daveArea = DaveArea.valueOf(enumType);
-            int intRack = ValueParser.parseInt(p, "rack");
-            int intSlot = ValueParser.parseInt(p, "slot");
-            int intBytes = ValueParser.parseInt(p, "bytes.count");
-            int intOffset = ValueParser.parseInt(p, "offset");
-            int intSleep = ValueParser.parseInt(p, "step.time.ms");
-            int intLoopCount = ValueParser.parseInt(p, "loop.count");
-            int intAreaNumber = ValueParser.parseInt(p, "area.number");
-            String appMode = ValueParser.readPropAsText(p, APP_WORK_OPTION);
-            EnumS7Area enumS7Area = ValueParser.readEnum(p, "s7.area", EnumS7Area.class, EnumS7Area.values());
-            int intS7DBNumber = ValueParser.parseInt(p, "s7.db.number");
             int successCount = 0;
             int errorCount = 0;
 
 
-            Rack = intRack;
-            Slot = intSlot;
-            IpAddress = ipHost;
 
             if (Connect()) {
-                switch (appMode) {
-                    case "TEST": {
-                        PerformTests(enumS7Area, intS7DBNumber, intBytes);
+                switch (appOptions.getAppWorkMode()) {
+                    case EnumAppWorkMode.TEST: {
+                        performTests();
                         break;
                     }
-                    case "READ": {
-                        danataReadTest(enumS7Area, intS7DBNumber, intOffset, intBytes);
+                    case EnumAppWorkMode.READ: {
+                        danataReadTest();
                         break;
                     }
                     default: {
-                        log.error(ERROR_LOG_PREFIX + "Не определен режим работы: " + APP_WORK_OPTION + " = '" + appMode + "'");
+                        log.error(ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
                     }
 
                 }
@@ -391,12 +373,12 @@ public class DatanaSimensTestMoka7 {
         log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
     }
 
-    private static void danataReadTest(EnumS7Area enumS7Area, int intS7DBNumber, int intOffset, int intBytes) {
+    private static void danataReadTest() {
 
         TestBegin("danataReadTest()");
-        boolean isSuccess = readDataS7(enumS7Area, intS7DBNumber, intBytes);
+        boolean isSuccess = readDataS7();
         if (isSuccess) {
-            log.info("[Чтение данных] DB " + intS7DBNumber + " Упешно прочитано");
+            log.info("[Чтение данных] Упешно прочитано");
         }
         TestEnd(isSuccess ? 0 : 1);
     }

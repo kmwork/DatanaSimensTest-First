@@ -20,15 +20,20 @@ import java.util.Properties;
 public class DatanaSimensTest {
     private static final String CONF_FILE_NAME = "datana_siemens.properties";
     private static final String SYS_DIR_PROP = "app.dir";
-    private static final String DIR_DEFAULT = "//home//lin//work_lanit//projects//Siemens-K4//config";
-    private static final String ENCODING ="UTF8";
+    private static final String ENCODING = "UTF8";
+
+    //private static final Logger log = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    static {
+        System.setProperty("file.encoding", ENCODING);
+    }
 
     public static void main(String[] args) {
-        try {
-            System.setProperty("file.encoding", ENCODING);
 
-            String dirConf = System.getProperty(SYS_DIR_PROP, DIR_DEFAULT);
-            File f = new File(dirConf + File.separator + CONF_FILE_NAME);
+        log.info("[DatanaSimensTest] ================ Запуск ================. Аргументы = " + Arrays.toString(args));
+        try {
+            String dirConf = ValueParser.readPropAsText(System.getProperties(), SYS_DIR_PROP);
+
+            File f = new File(dirConf, CONF_FILE_NAME);
             if (!f.isFile() || !f.exists()) {
                 log.error("Файл не найден: " + f.getAbsolutePath());
                 System.exit(-100);
@@ -37,14 +42,14 @@ public class DatanaSimensTest {
             Properties p = new Properties();
             try (Reader fileReader = new FileReader(f, Charset.forName(ENCODING))) {
                 p.load(fileReader);
-            }catch (IOException ex){
+            } catch (IOException ex) {
                 log.error("Не смог прочитать файл: " + f.getAbsolutePath());
                 System.exit(-200);
             }
 
             log.info("[CONFIG]" + p);
-            String ipHost = ValueParser.readPropAsText(p,"host");
-            String enumType = ValueParser.readPropAsText(p,"dave.area");
+            String ipHost = ValueParser.readPropAsText(p, "host");
+            String enumType = ValueParser.readPropAsText(p, "dave.area");
             DaveArea daveArea = DaveArea.valueOf(enumType);
             int intRack = ValueParser.parseInt(p, "rack");
             int intSlot = ValueParser.parseInt(p, "slot");
@@ -56,7 +61,7 @@ public class DatanaSimensTest {
 
             int successCount = 0;
             int errorCount = 0;
-            for (int index = 1; successCount<intLoopCount ; index++) {
+            for (int index = 1; successCount < intLoopCount; index++) {
                 int step = index + 1;
                 try {
                     S7Connector connector =
@@ -69,8 +74,8 @@ public class DatanaSimensTest {
 
                     //Read from DB100 10 bytes
                     byte[] bs = connector.read(daveArea, intAreaNumber, intBytes, intOffset);
-                    successCount ++;
-                    log.info("[Data: Шаг = " + step + ", Успешных шагов = "+successCount+" ]" + Arrays.toString(bs));
+                    successCount++;
+                    log.info("[Data: Шаг = " + step + ", Успешных шагов = " + successCount + " ]" + Arrays.toString(bs));
                     Thread.sleep(intSleep);
                 } catch (S7Exception s7) {
                     log.error("[ERROR-DATA: Шаг = " + step + ", Ошибка", s7.getLocalizedMessage());
@@ -79,10 +84,11 @@ public class DatanaSimensTest {
             }
 
 
-           log.info("[ИТОГ: Успешных шагов = "+successCount+", Ошибочных попыток =  "+ errorCount);
+            log.info("[ИТОГ: Успешных шагов = " + successCount + ", Ошибочных попыток =  " + errorCount);
         } catch (AppException | InterruptedException e) {
-            log.error("[App-Error: Аварийное завершение программы: "+e);
+            log.error("[App-Error: Аварийное завершение программы: " + e);
         }
 
+        log.info("[DatanaSimensTest] ********* Завершение программы *********");
     }
 }

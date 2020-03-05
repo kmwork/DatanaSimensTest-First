@@ -8,14 +8,15 @@ import java.util.Properties;
 @Slf4j
 public class ValueParser {
     private static final String PREFIX_LOG = "[CONFIG] ";
+
     public static int parseInt(Properties p, String userNameField) throws AppException {
-        String strValue =readPropAsText(p, userNameField);
+        String strValue = readPropAsText(p, userNameField);
         return parseInt(strValue, userNameField);
 
     }
 
-    public static String readPropAsText(Properties p, String userNameField) throws AppException{
-        String strValue =p.getProperty(userNameField);
+    public static String readPropAsText(Properties p, String userNameField) throws AppException {
+        String strValue = p.getProperty(userNameField);
         if (StringUtils.isEmpty(strValue)) {
             String args = userNameField + strValue;
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
@@ -25,6 +26,7 @@ public class ValueParser {
 
         return strValue;
     }
+
     public static int parseInt(String strValue, String userNameField) throws AppException {
         log.debug(PREFIX_LOG + ": parse as Int for Field [" + userNameField + "] = " + strValue);
         String args = userNameField + "= " + strValue;

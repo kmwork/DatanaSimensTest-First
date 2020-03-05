@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.config.EnumAppWorkMode;
+import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.FormatUtils;
 
 import java.text.SimpleDateFormat;
@@ -53,61 +54,79 @@ public class Moka7Executer implements IExecutor {
         this.appOptions = appOptions;
     }
 
+    private String prefixMethod(String functionName) {
+        return "[Method: " + functionName + "] ";
+    }
 
-    private void TestBegin(String FunctionName) {
-        log.info("");
-        log.info("+================================================================");
-        log.info("| " + FunctionName);
-        log.info("+================================================================");
+    private void TestBegin(String functionName) {
+        String prefix = prefixMethod(functionName);
+        log.info(prefix);
+        log.info(prefix + "+================================================================");
         Elapsed = System.currentTimeMillis();
     }
 
-    private void TestEnd(int Result) {
-        if (Result != 0) {
+    private void TestEnd(String functionName, int result) {
+        String prefix = prefixMethod(functionName);
+        if (result != 0) {
             failedCount++;
-            Error(Result);
+            Error(functionName, result);
         } else
             successCount++;
-        log.info("Execution time " + (System.currentTimeMillis() - Elapsed) + " ms");
+        log.info(prefix + " Время выполнения = " + (System.currentTimeMillis() - Elapsed) + " ms");
+        log.info(prefix + "-------------------------------------------------------------");
     }
 
-    private void Error(int erorrCode) {
-        log.error("[S7Client-Error] Код ошибки = " + S7Client.ErrorText(erorrCode));
+    private void Error(String functionName, int erorrCode) {
+        String prefix = prefixMethod(functionName) + "[Error] ";
+        log.error(prefix + " Код ошибки = " + erorrCode + ". Описание: " + S7Client.ErrorText(erorrCode));
     }
 
     private void BlockInfo(int BlockType, int BlockNumber) {
         S7BlockInfo Block = new S7BlockInfo();
-        TestBegin("GetAgBlockInfo()");
+        String method = "Чтение блока";
+        TestBegin(method);
+        int result = -1;
+        try {
 
-        int Result = clientS7.GetAgBlockInfo(BlockType, BlockNumber, Block);
-        if (Result == 0) {
-            log.info(" ====================== Block Flags ======================");
-            log.info("Block Flags     : " + Integer.toBinaryString(Block.BlkFlags()));
-            log.info("Block Number    : " + Block.BlkNumber());
-            log.info("Block Languege  : " + Block.BlkLang());
-            log.info("Load Size       : " + Block.LoadSize());
-            log.info("SBB Length      : " + Block.SBBLength());
-            log.info("Local Data      : " + Block.LocalData());
-            log.info("MC7 Size        : " + Block.MC7Size());
-            log.info("Author          : " + Block.Author());
-            log.info("Family          : " + Block.Family());
-            log.info("Header          : " + Block.Header());
-            log.info("Version         : " + Block.Version());
-            log.info("Checksum        : 0x" + Integer.toHexString(Block.Checksum()));
-            SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy");
-            log.info("Code Date       : " + ft.format(Block.CodeDate()));
-            log.info("Interface Date  : " + ft.format(Block.IntfDate()));
-            log.info(" ______________________ Block Flags  (конец) ______________________");
+            result = clientS7.GetAgBlockInfo(BlockType, BlockNumber, Block);
+            if (result == 0) {
+                log.info(" ====================== Block Flags ======================");
+                log.info("Block Flags     : " + Integer.toBinaryString(Block.BlkFlags()));
+                log.info("Block Number    : " + Block.BlkNumber());
+                log.info("Block Languege  : " + Block.BlkLang());
+                log.info("Load Size       : " + Block.LoadSize());
+                log.info("SBB Length      : " + Block.SBBLength());
+                log.info("Local Data      : " + Block.LocalData());
+                log.info("MC7 Size        : " + Block.MC7Size());
+                log.info("Author          : " + Block.Author());
+                log.info("Family          : " + Block.Family());
+                log.info("Header          : " + Block.Header());
+                log.info("Version         : " + Block.Version());
+                log.info("Checksum        : 0x" + Integer.toHexString(Block.Checksum()));
+                SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy");
+                log.info("Code Date       : " + ft.format(Block.CodeDate()));
+                log.info("Interface Date  : " + ft.format(Block.IntfDate()));
+                log.info(" ______________________ Block Flags  (конец) ______________________");
+            }
+        } finally {
+            TestEnd(method, result);
         }
-        TestEnd(Result);
+
     }
 
     private boolean readDataS7() {
-        IntByRef SizeRead = new IntByRef(appOptions.getIntBytes());
-        TestBegin("DBGet()");
-        int Result = clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
-        TestEnd(Result);
-        if (Result == 0) {
+        IntByRef SizeRead = new IntByRef(0);
+
+        String method = "Чтение данных";
+        TestBegin(method);
+        int result = -1;
+        try {
+            clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
+        } finally {
+            TestEnd(method, result);
+        }
+
+        if (result == 0) {
             DataToMove = SizeRead.Value; // Stores DB size for next test
             log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + DataToMove + " bytes");
             FormatUtils.hexDump(Buffer, DataToMove);
@@ -117,21 +136,33 @@ public class Moka7Executer implements IExecutor {
     }
 
     private void DBRead() {
-        TestBegin("Чтение данных для s7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
-        int Result = clientS7.ReadArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
-        if (Result == 0) {
+        String method = "чтение блока";
+        TestBegin(method);
+        int result = -1;
+        try {
+            clientS7.ReadArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
+        } finally {
+            TestEnd(method, result);
+        }
+        if (result == 0) {
             log.info(AppConts.SUCCESS_LOG_PREFIX + "Прочитано из getEnumS7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
         }
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     private void DBWrite() {
-        TestBegin("Запись данных для s7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
-        int Result = clientS7.WriteArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
-        if (Result == 0) {
-            log.info(AppConts.SUCCESS_LOG_PREFIX + "Записано из getEnumS7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
+        String method = "записиь данных";
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.WriteArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
+        } finally {
+            TestEnd(method, result);
         }
-        TestEnd(Result);
+        if (result == 0) {
+            log.info(AppConts.SUCCESS_LOG_PREFIX + "Записано из getEnumS7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
+
+        }
     }
 
     /**
@@ -151,44 +182,54 @@ public class Moka7Executer implements IExecutor {
         try {
             Thread.sleep(appOptions.getIntStepPauseMS());
         } catch (InterruptedException e) {
+
+
         }
     }
 
     public void ShowStatus() {
+        String method = "чтение статуса";
+        String prefix = prefixMethod(method);
         IntByRef PlcStatus = new IntByRef(S7.S7CpuStatusUnknown);
-        TestBegin("GetPlcStatus()");
-        int Result = clientS7.GetPlcStatus(PlcStatus);
-        if (Result == 0) {
-            System.out.print("PLC Status : ");
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.GetPlcStatus(PlcStatus);
+        } finally {
+            TestEnd(method, result);
+        }
+        if (result == 0) {
+            StringBuilder stringBuilder = new StringBuilder("PLC Status : ");
             switch (PlcStatus.Value) {
                 case S7.S7CpuStatusRun:
-                    log.info("RUN");
+                    stringBuilder.append("RUN");
                     break;
                 case S7.S7CpuStatusStop:
-                    log.info("STOP");
+                    stringBuilder.append(("STOP");
                     break;
                 default:
-                    log.info("Unknown (" + PlcStatus.Value + ")");
+                    stringBuilder.append("Unknown (" + PlcStatus.Value + ")");
             }
+            log.info(prefix + " Получен статус = " + stringBuilder);
         }
         CurrentStatus = PlcStatus.Value;
-        TestEnd(Result);
+
     }
 
     public void DoRun() {
         TestBegin("PlcHotStart()");
-        int Result = clientS7.PlcHotStart();
-        if (Result == 0)
+        int result = clientS7.PlcHotStart();
+        if (result == 0)
             log.info("PLC Started");
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     public void DoStop() {
         TestBegin("PlcStop()");
-        int Result = clientS7.PlcStop();
-        if (Result == 0)
+        int result = clientS7.PlcStop();
+        if (result == 0)
             log.info("PLC Stopped");
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     public void RunStop() {
@@ -206,80 +247,80 @@ public class Moka7Executer implements IExecutor {
     }
 
     public void GetSysInfo() {
-        int Result;
+        int result;
         TestBegin("GetOrderCode()");
         S7OrderCode OrderCode = new S7OrderCode();
-        Result = clientS7.GetOrderCode(OrderCode);
-        if (Result == 0) {
+        result = clientS7.GetOrderCode(OrderCode);
+        if (result == 0) {
             log.info("Order Code        : " + OrderCode.Code());
             log.info("Firmware version  : " + OrderCode.V1 + "." + OrderCode.V2 + "." + OrderCode.V3);
         }
-        TestEnd(Result);
+        TestEnd(method, result);
 
         TestBegin("GetCpuInfo()");
         S7CpuInfo CpuInfo = new S7CpuInfo();
-        Result = clientS7.GetCpuInfo(CpuInfo);
-        if (Result == 0) {
+        result = clientS7.GetCpuInfo(CpuInfo);
+        if (result == 0) {
             log.info("Module Type Name  : " + CpuInfo.ModuleTypeName());
             log.info("Serial Number     : " + CpuInfo.SerialNumber());
             log.info("AS Name           : " + CpuInfo.ASName());
             log.info("CopyRight         : " + CpuInfo.Copyright());
             log.info("Module Name       : " + CpuInfo.ModuleName());
         }
-        TestEnd(Result);
+        TestEnd(method, result);
 
         TestBegin("GetCpInfo()");
         S7CpInfo CpInfo = new S7CpInfo();
-        Result = clientS7.GetCpInfo(CpInfo);
-        if (Result == 0) {
+        result = clientS7.GetCpInfo(CpInfo);
+        if (result == 0) {
             log.info("Max PDU Length    : " + CpInfo.MaxPduLength);
             log.info("Max connections   : " + CpInfo.MaxConnections);
             log.info("Max MPI rate (bps): " + CpInfo.MaxMpiRate);
             log.info("Max Bus rate (bps): " + CpInfo.MaxBusRate);
         }
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     public void GetDateAndTime() {
         Date PlcDateTime = new Date();
         TestBegin("GetPlcDateTime()");
-        int Result = clientS7.GetPlcDateTime(PlcDateTime);
-        if (Result == 0)
+        int result = clientS7.GetPlcDateTime(PlcDateTime);
+        if (result == 0)
             log.info("CPU Date/Time : " + PlcDateTime);
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     public void SyncDateAndTime() {
         TestBegin("SetPlcSystemDateTime()");
-        int Result = clientS7.SetPlcSystemDateTime();
-        TestEnd(Result);
+        int result = clientS7.SetPlcSystemDateTime();
+        TestEnd(method, result);
     }
 
     public void ReadSzl() {
         S7Szl SZL = new S7Szl(1024);
         TestBegin("ReadSZL() - ID : 0x0011, IDX : 0x0000");
-        int Result = clientS7.ReadSZL(0x0011, 0x0000, SZL);
-        if (Result == 0) {
+        int result = clientS7.ReadSZL(0x0011, 0x0000, SZL);
+        if (result == 0) {
             log.info("LENTHDR : " + SZL.LENTHDR);
             log.info("N_DR    : " + SZL.N_DR);
             log.info("Size    : " + SZL.DataSize);
             FormatUtils.hexDump(SZL.Data, SZL.DataSize);
         }
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     public void GetProtectionScheme() {
         S7Protection Protection = new S7Protection();
         TestBegin("GetProtection()");
-        int Result = clientS7.GetProtection(Protection);
-        if (Result == 0) {
+        int result = clientS7.GetProtection(Protection);
+        if (result == 0) {
             log.info("sch_schal : " + Protection.sch_schal);
             log.info("sch_par   : " + Protection.sch_par);
             log.info("sch_rel   : " + Protection.sch_rel);
             log.info("bart_sch  : " + Protection.bart_sch);
             log.info("anl_sch   : " + Protection.anl_sch);
         }
-        TestEnd(Result);
+        TestEnd(method, result);
     }
 
     public void Summary() {
@@ -291,16 +332,16 @@ public class Moka7Executer implements IExecutor {
         log.info("+================================================================");
     }
 
-    public boolean Connect() {
-        TestBegin("ConnectTo()");
+    public boolean connectMoka7() {
+        TestBegin("connectMoka7()");
         clientS7.SetConnectionType(S7.OP);
-        int Result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
-        if (Result == 0) {
+        int result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
+        if (result == 0) {
             log.info("Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
             log.info("PDU negotiated : " + clientS7.PDULength() + " bytes");
         }
-        TestEnd(Result);
-        return Result == 0;
+        TestEnd(method, result);
+        return result == 0;
     }
 
 
@@ -319,14 +360,14 @@ public class Moka7Executer implements IExecutor {
         Summary();
     }
 
-
-    public void run() {
+    @Override
+    public void run() throws AppException {
         try {
             successCount = 0;
             failedCount = 0;
 
 
-            if (Connect()) {
+            if (connectMoka7()) {
                 if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST)
                     performTests();
                 else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)

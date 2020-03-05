@@ -108,28 +108,28 @@ public class S7 {
 
     // Returns a 32 bit unsigned value : from 0 to 4294967295 (2^32-1)
     public static long GetDWordAt(byte[] Buffer, int Pos) {
-        long Result;
-        Result = (long) (Buffer[Pos] & 0x0FF);
-        Result <<= 8;
-        Result += (long) (Buffer[Pos + 1] & 0x0FF);
-        Result <<= 8;
-        Result += (long) (Buffer[Pos + 2] & 0x0FF);
-        Result <<= 8;
-        Result += (long) (Buffer[Pos + 3] & 0x0FF);
-        return Result;
+        long result;
+        result = (long) (Buffer[Pos] & 0x0FF);
+        result <<= 8;
+        result += (long) (Buffer[Pos + 1] & 0x0FF);
+        result <<= 8;
+        result += (long) (Buffer[Pos + 2] & 0x0FF);
+        result <<= 8;
+        result += (long) (Buffer[Pos + 3] & 0x0FF);
+        return result;
     }
 
     // Returns a 32 bit signed value : from 0 to 4294967295 (2^32-1)
     public static int GetDIntAt(byte[] Buffer, int Pos) {
-        int Result;
-        Result = Buffer[Pos];
-        Result <<= 8;
-        Result += (Buffer[Pos + 1] & 0x0FF);
-        Result <<= 8;
-        Result += (Buffer[Pos + 2] & 0x0FF);
-        Result <<= 8;
-        Result += (Buffer[Pos + 3] & 0x0FF);
-        return Result;
+        int result;
+        result = Buffer[Pos];
+        result <<= 8;
+        result += (Buffer[Pos + 1] & 0x0FF);
+        result <<= 8;
+        result += (Buffer[Pos + 2] & 0x0FF);
+        result <<= 8;
+        result += (Buffer[Pos + 3] & 0x0FF);
+        return result;
     }
 
     // Returns a 32 bit floating point

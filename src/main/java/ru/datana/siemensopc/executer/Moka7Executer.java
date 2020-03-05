@@ -205,7 +205,7 @@ public class Moka7Executer implements IExecutor {
                     stringBuilder.append("RUN");
                     break;
                 case S7.S7CpuStatusStop:
-                    stringBuilder.append(("STOP");
+                    stringBuilder.append("STOP");
                     break;
                 default:
                     stringBuilder.append("Unknown (" + PlcStatus.Value + ")");
@@ -217,19 +217,31 @@ public class Moka7Executer implements IExecutor {
     }
 
     public void DoRun() {
-        TestBegin("PlcHotStart()");
-        int result = clientS7.PlcHotStart();
+
+        String method = "PlcHotStart()";
+        TestBegin(method);
+        int result = -1;
+        try {
+            clientS7.PlcHotStart();
+        } finally {
+            TestEnd(method, result);
+        }
         if (result == 0)
             log.info("PLC Started");
-        TestEnd(method, result);
     }
 
     public void DoStop() {
-        TestBegin("PlcStop()");
-        int result = clientS7.PlcStop();
-        if (result == 0)
-            log.info("PLC Stopped");
-        TestEnd(method, result);
+        String method = "PlcStop()";
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.PlcStop();
+
+            if (result == 0)
+                log.info("PLC Stopped");
+        } finally {
+            TestEnd(method, result);
+        }
     }
 
     public void RunStop() {
@@ -247,53 +259,78 @@ public class Moka7Executer implements IExecutor {
     }
 
     public void GetSysInfo() {
-        int result;
-        TestBegin("GetOrderCode()");
+        int result = -1;
+        String method = "получение инфо о прошивке";
+
+        TestBegin(method);
         S7OrderCode OrderCode = new S7OrderCode();
-        result = clientS7.GetOrderCode(OrderCode);
-        if (result == 0) {
-            log.info("Order Code        : " + OrderCode.Code());
-            log.info("Firmware version  : " + OrderCode.V1 + "." + OrderCode.V2 + "." + OrderCode.V3);
-        }
-        TestEnd(method, result);
 
-        TestBegin("GetCpuInfo()");
+        try {
+            result = clientS7.GetOrderCode(OrderCode);
+            if (result == 0) {
+                log.info("Order Code        : " + OrderCode.Code());
+                log.info("Firmware version  : " + OrderCode.V1 + "." + OrderCode.V2 + "." + OrderCode.V3);
+            }
+        } finally {
+            TestEnd(method, result);
+        }
+
+        String method2 = "получение инфо о процессоре";
+        TestBegin(method2);
         S7CpuInfo CpuInfo = new S7CpuInfo();
-        result = clientS7.GetCpuInfo(CpuInfo);
-        if (result == 0) {
-            log.info("Module Type Name  : " + CpuInfo.ModuleTypeName());
-            log.info("Serial Number     : " + CpuInfo.SerialNumber());
-            log.info("AS Name           : " + CpuInfo.ASName());
-            log.info("CopyRight         : " + CpuInfo.Copyright());
-            log.info("Module Name       : " + CpuInfo.ModuleName());
+        try {
+            result = clientS7.GetCpuInfo(CpuInfo);
+            if (result == 0) {
+                log.info("Module Type Name  : " + CpuInfo.ModuleTypeName());
+                log.info("Serial Number     : " + CpuInfo.SerialNumber());
+                log.info("AS Name           : " + CpuInfo.ASName());
+                log.info("CopyRight         : " + CpuInfo.Copyright());
+                log.info("Module Name       : " + CpuInfo.ModuleName());
+            }
+        } finally {
+            TestEnd(method2, result);
         }
-        TestEnd(method, result);
 
-        TestBegin("GetCpInfo()");
-        S7CpInfo CpInfo = new S7CpInfo();
-        result = clientS7.GetCpInfo(CpInfo);
-        if (result == 0) {
-            log.info("Max PDU Length    : " + CpInfo.MaxPduLength);
-            log.info("Max connections   : " + CpInfo.MaxConnections);
-            log.info("Max MPI rate (bps): " + CpInfo.MaxMpiRate);
-            log.info("Max Bus rate (bps): " + CpInfo.MaxBusRate);
+
+        String method3 = "получение инфо о процессоре (по частотам)";
+        TestBegin(method3);
+        try {
+            S7CpInfo CpInfo = new S7CpInfo();
+            result = clientS7.GetCpInfo(CpInfo);
+            if (result == 0) {
+                log.info("Max PDU Length    : " + CpInfo.MaxPduLength);
+                log.info("Max connections   : " + CpInfo.MaxConnections);
+                log.info("Max MPI rate (bps): " + CpInfo.MaxMpiRate);
+                log.info("Max Bus rate (bps): " + CpInfo.MaxBusRate);
+            }
+        } finally {
+            TestEnd(method3, result);
         }
-        TestEnd(method, result);
     }
 
     public void GetDateAndTime() {
         Date PlcDateTime = new Date();
-        TestBegin("GetPlcDateTime()");
-        int result = clientS7.GetPlcDateTime(PlcDateTime);
-        if (result == 0)
-            log.info("CPU Date/Time : " + PlcDateTime);
-        TestEnd(method, result);
+        String method = "получение процессорного времени";
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.GetPlcDateTime(PlcDateTime);
+            if (result == 0)
+                log.info("CPU Date/Time : " + PlcDateTime);
+        } finally {
+            TestEnd(method, result);
+        }
     }
 
     public void SyncDateAndTime() {
-        TestBegin("SetPlcSystemDateTime()");
-        int result = clientS7.SetPlcSystemDateTime();
-        TestEnd(method, result);
+        String method = "получение системного времени";
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.SetPlcSystemDateTime();
+        } finally {
+            TestEnd(method, result);
+        }
     }
 
     public void ReadSzl() {

@@ -8,11 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.ValueParser;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.charset.Charset;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -40,10 +36,10 @@ public class DatanaSimensTest {
             }
 
             Properties p = new Properties();
-            try (Reader fileReader = new FileReader(f, Charset.forName(ENCODING))) {
+            try (Reader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), ENCODING));) {
                 p.load(fileReader);
             } catch (IOException ex) {
-                log.error("Не смог прочитать файл: " + f.getAbsolutePath());
+                log.error("Не смог прочитать файл: " + f.getAbsolutePath(), ex);
                 System.exit(-200);
             }
 
@@ -78,7 +74,7 @@ public class DatanaSimensTest {
                     log.info("[Data: Шаг = " + step + ", Успешных шагов = " + successCount + " ]" + Arrays.toString(bs));
                     Thread.sleep(intSleep);
                 } catch (S7Exception s7) {
-                    log.error("[ERROR-DATA: Шаг = " + step + ", Ошибка", s7.getLocalizedMessage());
+                    log.error("[ERROR-DATA: Шаг = " + step + ", Ошибка", s7);
                     errorCount++;
                 }
             }
@@ -86,7 +82,7 @@ public class DatanaSimensTest {
 
             log.info("[ИТОГ: Успешных шагов = " + successCount + ", Ошибочных попыток =  " + errorCount);
         } catch (AppException | InterruptedException e) {
-            log.error("[App-Error: Аварийное завершение программы: " + e);
+            log.error("[App-Error: Аварийное завершение программы: ", e);
         }
 
         log.info("[DatanaSimensTest] ********* Завершение программы *********");

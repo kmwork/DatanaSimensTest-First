@@ -358,14 +358,15 @@ public class Moka7Executer implements IExecutor {
 
     public boolean connectMoka7() {
         String method = "Соединение с контроллером";
+        String prefix = prefixMethod(method);
         TestBegin(method);
         int result = -1;
         try {
             clientS7.SetConnectionType(S7.OP);
             result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
             if (result == 0) {
-                log.info("Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
-                log.info("PDU negotiated : " + clientS7.PDULength() + " bytes");
+                log.info(prefix + "Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
+                log.info(prefix + "PDU negotiated : " + clientS7.PDULength() + " bytes");
             }
             return result == 0;
         } finally {
@@ -395,8 +396,8 @@ public class Moka7Executer implements IExecutor {
             successCount = 0;
             failedCount = 0;
 
-
-            if (connectMoka7()) {
+            boolean isConnect = connectMoka7();
+            if (isConnect) {
                 if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST)
                     performTests();
                 else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)

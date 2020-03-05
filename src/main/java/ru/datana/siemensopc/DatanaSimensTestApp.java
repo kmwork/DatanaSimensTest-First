@@ -30,7 +30,7 @@ import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppLibraryType;
 import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.executer.IExecutor;
-import ru.datana.siemensopc.executer.Moka7Executer;
+import ru.datana.siemensopc.executer.Moka7Executor;
 import ru.datana.siemensopc.executer.S7GithubExecutor;
 import ru.datana.siemensopc.utils.AppException;
 
@@ -52,16 +52,16 @@ public class DatanaSimensTestApp {
             }
             AppLibraryType type = appOptions.getAppLibraryType();
             log.info(AppConts.APP_LOG_PREFIX + " ВЫБРАН АЛГОРИТМ " + type);
-            IExecutor executer = null;
+            IExecutor executor = null;
             if (type == AppLibraryType.MOKA7)
-                executer = new Moka7Executer(appOptions);
+                executor = new Moka7Executor(appOptions);
             else if (type == AppLibraryType.S7)
-                executer = new S7GithubExecutor(appOptions);
+                executor = new S7GithubExecutor(appOptions);
             else {
                 log.error(AppConts.ERROR_LOG_PREFIX + " Не определен аргорим программы = " + type);
                 System.exit(-100);
             }
-            executer.run();
+            executor.run();
 
         } catch (AppException ex) {
             log.error(AppConts.ERROR_LOG_PREFIX + " Ошибка в программе", ex);

@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Slf4j
-public class Moka7Executer implements IExecutor {
+public class Moka7Executor implements IExecutor {
 
 
     private long Elapsed;
@@ -29,7 +29,7 @@ public class Moka7Executer implements IExecutor {
 
     private final AppOptions appOptions;
 
-    public Moka7Executer(AppOptions appOptions) {
+    public Moka7Executor(AppOptions appOptions) {
         this.appOptions = appOptions;
     }
 

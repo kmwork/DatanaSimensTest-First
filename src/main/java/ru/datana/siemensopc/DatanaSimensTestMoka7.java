@@ -28,6 +28,7 @@ package ru.datana.siemensopc;
 import Moka7.*;
 import com.github.s7connector.api.DaveArea;
 import lombok.extern.slf4j.Slf4j;
+import ru.datana.siemensopc.utils.FormatUtils;
 import ru.datana.siemensopc.utils.ValueParser;
 
 import java.io.*;
@@ -37,16 +38,10 @@ import java.util.Date;
 import java.util.Properties;
 
 @Slf4j
-public class DatanaSimensTestV2 {
+public class DatanaSimensTestMoka7 {
     private static final String CONF_FILE_NAME = "datana_siemens.properties";
     private static final String SYS_DIR_PROP = "app.dir";
-    private static final String ENCODING = "UTF8";
-
-    //private static final Logger log = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    static {
-        System.setProperty("file.encoding", ENCODING);
-    }
-
+    private static final String ENCODING_PROP = "file.encoding";
 
     // If MakeAllTests = true, also DBWrite and Run/Stop tests will be performed
     private static final boolean MakeAllTests = true;
@@ -63,38 +58,7 @@ public class DatanaSimensTestV2 {
     private static int DataToMove; // Data size to read/write
     private static int CurrentStatus = S7.S7CpuStatusUnknown;
 
-    public static void HexDump(byte[] Buffer, int Size) {
-        int r = 0;
-        String Hex = "";
 
-        for (int i = 0; i < Size; i++) {
-            int v = (Buffer[i] & 0x0FF);
-            String hv = Integer.toHexString(v);
-
-            if (hv.length() == 1)
-                hv = "0" + hv + " ";
-            else
-                hv = hv + " ";
-
-            Hex = Hex + hv;
-
-            r++;
-            if (r == 16) {
-                System.out.print(Hex + " ");
-                log.info(S7.GetPrintableStringAt(Buffer, i - 15, 16));
-                Hex = "";
-                r = 0;
-            }
-        }
-        int L = Hex.length();
-        if (L > 0) {
-            while (Hex.length() < 49)
-                Hex = Hex + " ";
-            System.out.print(Hex);
-            log.info(S7.GetPrintableStringAt(Buffer, Size - r, r));
-        } else
-            log.info("");
-    }
 
     static void TestBegin(String FunctionName) {
         log.info("");
@@ -150,7 +114,7 @@ public class DatanaSimensTestV2 {
         if (Result == 0) {
             DataToMove = SizeRead.Value; // Stores DB size for next test
             log.info("DB " + DBSample + " - Size read " + DataToMove + " bytes");
-            HexDump(Buffer, DataToMove);
+            FormatUtils.hexDump(Buffer, DataToMove);
             return true;
         }
         return false;
@@ -303,7 +267,7 @@ public class DatanaSimensTestV2 {
             log.info("LENTHDR : " + SZL.LENTHDR);
             log.info("N_DR    : " + SZL.N_DR);
             log.info("Size    : " + SZL.DataSize);
-            HexDump(SZL.Data, SZL.DataSize);
+            FormatUtils.hexDump(SZL.Data, SZL.DataSize);
         }
         TestEnd(Result);
     }
@@ -360,9 +324,10 @@ public class DatanaSimensTestV2 {
     }
 
     public static void main(String[] args) throws IOException {
-        log.info("[DatanaSimensTest] ================ Запуск (Старая версия V1) ================. Аргументы = " + Arrays.toString(args));
+        log.info("[DatanaSimensTestMoka7] ================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
         try {
             String dirConf = ValueParser.readPropAsText(System.getProperties(), SYS_DIR_PROP);
+            String fileEncoding = ValueParser.readPropAsText(System.getProperties(), ENCODING_PROP);
 
             File f = new File(dirConf, CONF_FILE_NAME);
             if (!f.isFile() || !f.exists()) {
@@ -371,7 +336,7 @@ public class DatanaSimensTestV2 {
             }
 
             Properties p = new Properties();
-            try (Reader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), ENCODING));) {
+            try (Reader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(f), fileEncoding));) {
                 p.load(fileReader);
             } catch (IOException ex) {
                 log.error("Не смог прочитать файл: " + f.getAbsolutePath(), ex);
@@ -389,6 +354,7 @@ public class DatanaSimensTestV2 {
             int intSleep = ValueParser.parseInt(p, "step.time.ms");
             int intLoopCount = ValueParser.parseInt(p, "loop.count");
             int intAreaNumber = ValueParser.parseInt(p, "area.number");
+            boolean isDebug = "true".equalsIgnoreCase(ValueParser.readPropAsText(p, "debug.boolean"));
 
             int successCount = 0;
             int errorCount = 0;
@@ -399,14 +365,14 @@ public class DatanaSimensTestV2 {
             IpAddress = ipHost;
 
             if (Connect()) {
-                PerformTests();
+                if (isDebug) PerformTests();
             }
 
         } catch (Exception e) {
             log.error("[App-Error: Аварийное завершение программы: ", e);
         }
 
-        log.info("[DatanaSimensTest] ********* Завершение программы *********");
+        log.info("[DatanaSimensTestMoka7] ********* Завершение программы (Версия Мока7)*********");
     }
 
 }

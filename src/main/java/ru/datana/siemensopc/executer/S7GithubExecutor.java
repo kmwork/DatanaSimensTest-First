@@ -1,4 +1,4 @@
-package executer;
+package ru.datana.siemensopc.executer;
 
 import com.github.s7connector.api.S7Connector;
 import com.github.s7connector.api.factory.S7ConnectorFactory;

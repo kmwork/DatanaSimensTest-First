@@ -25,13 +25,13 @@ package ru.datana.siemensopc;
  * @author Dave Nardella
  */
 
-import executer.IExecutor;
-import executer.Moka7Executer;
-import executer.S7GithubExecutor;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppLibraryType;
 import ru.datana.siemensopc.config.AppOptions;
+import ru.datana.siemensopc.executer.IExecutor;
+import ru.datana.siemensopc.executer.Moka7Executer;
+import ru.datana.siemensopc.executer.S7GithubExecutor;
 import ru.datana.siemensopc.utils.AppException;
 
 import java.util.Arrays;

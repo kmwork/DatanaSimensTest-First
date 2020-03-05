@@ -57,7 +57,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ru.datana.siemensopc.DatanaSimensTestMoka7</mainClass>
+                            <mainClass>ru.datana.siemensopc.DatanaSimensTestApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

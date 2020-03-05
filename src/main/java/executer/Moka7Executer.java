@@ -19,7 +19,7 @@
 |  decide to adopt.                                                            |
 |                                                                              |
 |=============================================================================*/
-package ru.datana.siemensopc;
+package executer;
 
 /**
  * @author Dave Nardella
@@ -27,22 +27,17 @@ package ru.datana.siemensopc;
 
 import Moka7.*;
 import lombok.extern.slf4j.Slf4j;
+import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.config.EnumAppWorkMode;
-import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.FormatUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 
 @Slf4j
-public class DatanaSimensTestMoka7 {
+public class Moka7Executer implements IExecutor {
 
-
-    private static final String SUCCESS_LOG_PREFIX = "[App-Ошибка] ";
-    private static final String ERROR_LOG_PREFIX = "[App-Успешно] ";
-    private static final String APP_LOG_PREFIX = "[App-Danata-Mock7] ";
 
     private long Elapsed;
     private byte[] Buffer = new byte[65536]; // 64K buffer (maximum for S7400 systems)
@@ -54,7 +49,7 @@ public class DatanaSimensTestMoka7 {
 
     private final AppOptions appOptions;
 
-    public DatanaSimensTestMoka7(AppOptions appOptions) {
+    public Moka7Executer(AppOptions appOptions) {
         this.appOptions = appOptions;
     }
 
@@ -122,19 +117,19 @@ public class DatanaSimensTestMoka7 {
     }
 
     private void DBRead() {
-        TestBegin("Чтение данных для s7Area = " + appOptions.getEnumS7Area().getUserDesc());
-        int Result = clientS7.ReadArea(appOptions.getEnumS7Area().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
+        TestBegin("Чтение данных для s7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
+        int Result = clientS7.ReadArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
         if (Result == 0) {
-            log.info(SUCCESS_LOG_PREFIX + "Прочитано из getEnumS7Area = " + appOptions.getEnumS7Area().getUserDesc());
+            log.info(AppConts.SUCCESS_LOG_PREFIX + "Прочитано из getEnumS7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
         }
         TestEnd(Result);
     }
 
     private void DBWrite() {
-        TestBegin("Запись данных для s7Area = " + appOptions.getEnumS7Area().getUserDesc());
-        int Result = clientS7.WriteArea(appOptions.getEnumS7Area().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
+        TestBegin("Запись данных для s7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
+        int Result = clientS7.WriteArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
         if (Result == 0) {
-            log.info(SUCCESS_LOG_PREFIX + "Записано из getEnumS7Area = " + appOptions.getEnumS7Area().getUserDesc());
+            log.info(AppConts.SUCCESS_LOG_PREFIX + "Записано из getEnumS7Area = " + appOptions.getEnumMoka7AreaType().getUserDesc());
         }
         TestEnd(Result);
     }
@@ -325,21 +320,6 @@ public class DatanaSimensTestMoka7 {
     }
 
 
-    public static void main(String[] args) {
-        log.info(APP_LOG_PREFIX + "================ Запуск (Новая версия V2) ================. Аргументы = " + Arrays.toString(args));
-        AppOptions appOptions = new AppOptions();
-        try {
-            appOptions.load();
-        } catch (AppException e) {
-            log.error("Ошибка чтения конфига", e);
-            return;
-        }
-        DatanaSimensTestMoka7 app = new DatanaSimensTestMoka7(appOptions);
-        app.run();
-
-        log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
-    }
-
     public void run() {
         try {
             successCount = 0;
@@ -352,17 +332,15 @@ public class DatanaSimensTestMoka7 {
                 else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)
                     danataReadTest();
                 else
-                    log.error(ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
+                    log.error(AppConts.ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
 
 
             }
 
 
         } catch (Exception e) {
-            log.error(ERROR_LOG_PREFIX + "Аварийное завершение программы: ", e);
+            log.error(AppConts.ERROR_LOG_PREFIX + "Аварийное завершение программы: ", e);
         }
-
-        log.info(APP_LOG_PREFIX + "********* Завершение программы (Версия Мока7) *********");
     }
 
     private void danataReadTest() {

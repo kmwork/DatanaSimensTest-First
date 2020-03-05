@@ -54,7 +54,7 @@ public class ValueParser {
 
 
     public static <EN extends Enum<EN>> EN readEnum(Properties p, String userNameField, Class<EN> enumClazz, EN[] allEnumValues) throws AppException {
-        String strValue = readPropAsText(p, userNameField);
+        String strValue = readPropAsText(p, userNameField, false);
         String args = "as enum : " + userNameField + " = '" + strValue + "'";
         if (!enumClazz.isEnum()) {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно указан тип " + enumClazz.getCanonicalName(), args, null);

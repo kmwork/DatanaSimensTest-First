@@ -1,5 +1,5 @@
 ﻿chcp 1251
-echo Программ для теста котролеера Сименс
+echo Программ для теста контролера Сименс
 pause
 set JAVA_HOME=f:\apps\jdk8_131\jre
 set PATH=%JAVA_HOME%\bin;%PATH%

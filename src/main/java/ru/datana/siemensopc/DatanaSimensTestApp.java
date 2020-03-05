@@ -41,7 +41,7 @@ public class DatanaSimensTestApp {
 
     public static void main(String[] args) {
         log.info(AppConts.APP_LOG_PREFIX + "================ Запуск  ================. Аргументы = " + Arrays.toString(args));
-        log.info(AppConts.APP_LOG_PREFIX + "Версия: V2");
+        log.info(AppConts.APP_LOG_PREFIX + "Версия: V3");
         try {
             AppOptions appOptions = new AppOptions();
             try {

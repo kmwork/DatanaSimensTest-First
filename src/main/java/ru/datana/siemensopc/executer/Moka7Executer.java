@@ -334,30 +334,40 @@ public class Moka7Executer implements IExecutor {
     }
 
     public void ReadSzl() {
+        String method = "чтение килобайта";
         S7Szl SZL = new S7Szl(1024);
-        TestBegin("ReadSZL() - ID : 0x0011, IDX : 0x0000");
-        int result = clientS7.ReadSZL(0x0011, 0x0000, SZL);
-        if (result == 0) {
-            log.info("LENTHDR : " + SZL.LENTHDR);
-            log.info("N_DR    : " + SZL.N_DR);
-            log.info("Size    : " + SZL.DataSize);
-            FormatUtils.hexDump(SZL.Data, SZL.DataSize);
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.ReadSZL(0x0011, 0x0000, SZL);
+            if (result == 0) {
+                log.info("LENTHDR : " + SZL.LENTHDR);
+                log.info("N_DR    : " + SZL.N_DR);
+                log.info("Size    : " + SZL.DataSize);
+                FormatUtils.hexDump(SZL.Data, SZL.DataSize);
+            }
+        } finally {
+            TestEnd(method, result);
         }
-        TestEnd(method, result);
     }
 
     public void GetProtectionScheme() {
         S7Protection Protection = new S7Protection();
-        TestBegin("GetProtection()");
-        int result = clientS7.GetProtection(Protection);
-        if (result == 0) {
-            log.info("sch_schal : " + Protection.sch_schal);
-            log.info("sch_par   : " + Protection.sch_par);
-            log.info("sch_rel   : " + Protection.sch_rel);
-            log.info("bart_sch  : " + Protection.bart_sch);
-            log.info("anl_sch   : " + Protection.anl_sch);
+        String method = "Служебный метод по защите";
+        TestBegin(method);
+        int result = -1;
+        try {
+            result = clientS7.GetProtection(Protection);
+            if (result == 0) {
+                log.info("sch_schal : " + Protection.sch_schal);
+                log.info("sch_par   : " + Protection.sch_par);
+                log.info("sch_rel   : " + Protection.sch_rel);
+                log.info("bart_sch  : " + Protection.bart_sch);
+                log.info("anl_sch   : " + Protection.anl_sch);
+            }
+        } finally {
+            TestEnd(method, result);
         }
-        TestEnd(method, result);
     }
 
     public void Summary() {
@@ -370,15 +380,20 @@ public class Moka7Executer implements IExecutor {
     }
 
     public boolean connectMoka7() {
-        TestBegin("connectMoka7()");
-        clientS7.SetConnectionType(S7.OP);
-        int result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
-        if (result == 0) {
-            log.info("Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
-            log.info("PDU negotiated : " + clientS7.PDULength() + " bytes");
+        String method = "Соедение с контроллером";
+        TestBegin(method);
+        int result = -1;
+        try {
+            clientS7.SetConnectionType(S7.OP);
+            result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
+            if (result == 0) {
+                log.info("Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
+                log.info("PDU negotiated : " + clientS7.PDULength() + " bytes");
+            }
+            return result == 0;
+        } finally {
+            TestEnd(method, result);
         }
-        TestEnd(method, result);
-        return result == 0;
     }
 
 
@@ -423,12 +438,17 @@ public class Moka7Executer implements IExecutor {
 
     private void danataReadTest() {
 
-        TestBegin("danataReadTest()");
-        boolean isSuccess = readDataS7();
-        if (isSuccess) {
-            log.info("[Чтение данных] Упешно прочитано");
+        String method = "Пробнавя чтение нужного размера";
+        TestBegin(method);
+        boolean isSuccess = false;
+        try {
+            isSuccess = readDataS7();
+            if (isSuccess) {
+                log.info("[Чтение данных] Упешно прочитано");
+            }
+        } finally {
+            TestEnd(method, isSuccess ? 0 : -1);
         }
-        TestEnd(isSuccess ? 0 : 1);
     }
 
 }

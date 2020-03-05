@@ -1,24 +1,3 @@
-/*
-/*=============================================================================|
-|  PROJECT Moka7                                                         1.0.2 |
-|==============================================================================|
-|  Copyright (C) 2013, 2016 Davide Nardella                                    |
-|  All rights reserved.                                                        |
-|==============================================================================|
-|  SNAP7 is free software: you can redistribute it and/or modify               |
-|  it under the terms of the Lesser GNU General Public License as published by |
-|  the Free Software Foundation, either version 3 of the License, or under     |
-|  EPL Eclipse Public License 1.0.                                             |
-|                                                                              |
-|  This means that you have to chose in advance which take before you import   |
-|  the library into your project.                                              |
-|                                                                              |
-|  SNAP7 is distributed in the hope that it will be useful,                    |
-|  but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE whatever license you    |
-|  decide to adopt.                                                            |
-|                                                                              |
-|=============================================================================*/
 package ru.datana.siemensopc.executer;
 
 /**
@@ -60,8 +39,7 @@ public class Moka7Executer implements IExecutor {
 
     private void TestBegin(String functionName) {
         String prefix = prefixMethod(functionName);
-        log.info(prefix);
-        log.info(prefix + "+================================================================");
+        log.info(prefix + "==== старт ==== ");
         Elapsed = System.currentTimeMillis();
     }
 
@@ -72,8 +50,7 @@ public class Moka7Executer implements IExecutor {
             Error(functionName, result);
         } else
             successCount++;
-        log.info(prefix + " Время выполнения = " + (System.currentTimeMillis() - Elapsed) + " ms");
-        log.info(prefix + "-------------------------------------------------------------");
+        log.info(prefix + " === Время выполнения = " + (System.currentTimeMillis() - Elapsed) + " ms");
     }
 
     private void Error(String functionName, int erorrCode) {
@@ -380,7 +357,7 @@ public class Moka7Executer implements IExecutor {
     }
 
     public boolean connectMoka7() {
-        String method = "Соедение с контроллером";
+        String method = "Соединение с контроллером";
         TestBegin(method);
         int result = -1;
         try {
@@ -438,7 +415,7 @@ public class Moka7Executer implements IExecutor {
 
     private void danataReadTest() {
 
-        String method = "Пробнавя чтение нужного размера";
+        String method = "Пробная чтение нужного размера";
         TestBegin(method);
         boolean isSuccess = false;
         try {

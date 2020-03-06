@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * Секция - Область чтения в контролере по время или данные и т.п
+ * для Мока7
+ */
 @ToString
 @Getter
 @AllArgsConstructor

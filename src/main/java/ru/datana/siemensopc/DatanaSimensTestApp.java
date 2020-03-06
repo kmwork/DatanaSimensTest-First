@@ -23,6 +23,8 @@ package ru.datana.siemensopc;
 
 /**
  * Тестовое ПО на проверку дачтиков сименс
+ * по заданию https://conf.dds.lanit.ru/pages/viewpage.action?pageId=43683525
+ * pdf  (tech_task.pdf) с заданием в папке doc-manual
  */
 
 import lombok.extern.slf4j.Slf4j;

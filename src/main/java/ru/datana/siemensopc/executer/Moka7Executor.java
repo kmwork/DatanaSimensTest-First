@@ -15,6 +15,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
+/**
+ * Движок на Moka7
+ * на базе кода из
+ */
 @Slf4j
 public class Moka7Executor implements IExecutor {
 

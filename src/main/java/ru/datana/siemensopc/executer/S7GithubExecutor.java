@@ -9,6 +9,9 @@ import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.BitOperationsUtils;
 import ru.datana.siemensopc.utils.FormatUtils;
 
+/**
+ * Движок от GitHub (упрещенное апи - поключил через зависимость мавен)
+ */
 @Slf4j
 public class S7GithubExecutor implements IExecutor {
     private AppOptions appOptions;

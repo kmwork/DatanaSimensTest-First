@@ -95,11 +95,17 @@ public class Moka7Executor implements IExecutor {
     private boolean readDataS7() {
         IntByRef SizeRead = new IntByRef(0);
 
-        String method = "Чтение данных";
+        String method = "Чтение данных - ReadArea (datana edition)";
         TestBegin(method);
         int result = -1;
         try {
-            clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
+
+            //оригинал
+            //clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
+
+            //kostya-verion-rem
+            clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), Buffer);
+
         } finally {
             TestEnd(method, result);
         }
@@ -363,7 +369,9 @@ public class Moka7Executor implements IExecutor {
         TestBegin(method);
         int result = -1;
         try {
+            //kmwork-rem
             clientS7.SetConnectionType(S7.OP);
+            //clientS7.SetConnectionType(S7.S7_BASIC);
             result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
             if (result == 0) {
                 log.info(prefix + "Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
@@ -386,7 +394,9 @@ public class Moka7Executor implements IExecutor {
         ShowStatus();
         if (appOptions.isAppMakeAllTests())
             RunStop();
-        BlockInfo(S7.Block_SFC, 1); // Get SFC 1 info (always present in a CPU)
+
+        //kostya-rem
+        //BlockInfo(S7.Block_SFC, 1); // Get SFC 1 info (always present in a CPU)
         DBPlay();
         Summary();
     }

@@ -10,7 +10,6 @@ import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.LanitFileUtils;
 import ru.datana.siemensopc.utils.ValueParser;
 
-import java.util.BitSet;
 import java.util.Properties;
 
 @ToString
@@ -62,7 +61,7 @@ public class AppOptions {
     private EnumConnectionMoka7Type enumConnectionMoka7Type;
 
     @Getter
-    private BitSet bitSetMask;
+    private byte[] bytesMaskOperationAnd;
 
     @Getter
     private int bitFlipFromIndex;
@@ -96,7 +95,7 @@ public class AppOptions {
 
 
         isActiveBitMode = ValueParser.readBoolean(p, "mode.bits.is.active");
-        bitSetMask = ValueParser.readBitSet(p, "bit.set.mask");
+        bytesMaskOperationAnd = ValueParser.readBytes(p, "bytes.mask.operation.and");
         bitFlipFromIndex = ValueParser.parseInt(p, "bit.flip.from.index");
         bitFlipToIndex = ValueParser.parseInt(p, "bit.flip.to.index");
         enumViewFormatType = ValueParser.readEnum(p, "view.bytes.type", EnumFormatBytesType.class, EnumFormatBytesType.values());

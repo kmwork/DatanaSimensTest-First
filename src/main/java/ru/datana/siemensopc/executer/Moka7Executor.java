@@ -347,6 +347,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Для мета инфы (не работает на демо-стенде)
+     */
     public void GetDateAndTime() {
         Date PlcDateTime = new Date();
         String method = "получение процессорного времени";
@@ -361,6 +364,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Для мета инфы (не работает на демо-стенде)
+     */
     public void SyncDateAndTime() {
         String method = "получение системного времени";
         TestBegin(method);
@@ -372,6 +378,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Для мета инфы (не работает на демо-стенде)
+     */
     public void ReadSzl() {
         String method = "чтение килобайта";
         S7Szl SZL = new S7Szl(1024);
@@ -392,6 +401,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Не знаю что это (не работает на демо-стенде)
+     */
     public void GetProtectionScheme() {
         S7Protection Protection = new S7Protection();
         String method = "Служебный метод по защите";
@@ -411,6 +423,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Вывод счетчиков по ошибкам
+     */
     public void Summary() {
         log.info("");
         log.info("+================================================================");
@@ -420,6 +435,11 @@ public class Moka7Executor implements IExecutor {
         log.info("+================================================================");
     }
 
+    /**
+     * Соедениться с S7
+     *
+     * @return признак успешности
+     */
     public boolean connectMoka7() {
         String method = "Соединение с контроллером";
         String prefix = prefixMethod(method);
@@ -440,7 +460,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
-
+    /**
+     * Диагностика (не работает на демо-стенде)
+     */
     public void performTests() {
         GetSysInfo();
         GetProtectionScheme();
@@ -458,6 +480,12 @@ public class Moka7Executor implements IExecutor {
         Summary();
     }
 
+
+    /**
+     * Выполнение сервиса
+     *
+     * @throws AppException
+     */
     @Override
     public void run() throws AppException {
         try {
@@ -467,11 +495,13 @@ public class Moka7Executor implements IExecutor {
             boolean isConnect = connectMoka7();
             try {
                 if (isConnect) {
-                    if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST)
+                    if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST) {
+                        //выполенение тестов - диагностика
                         performTests();
-                    else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)
+                    } else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ) {
+                        //чтение полезных данных
                         danataReadTest();
-                    else
+                    } else
                         log.error(AppConts.ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
                 }
             } finally {
@@ -485,6 +515,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Чтение данных с контролеера в цикле
+     */
     private void danataReadTest() {
         String predfix = prefixMethod("Цикл чтения");
         log.info(predfix + " Кол-во шагов = " + appOptions.getIntLoopCount() + " по " + appOptions.getIntBytes() + " байт");

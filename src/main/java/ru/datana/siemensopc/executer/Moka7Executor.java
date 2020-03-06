@@ -8,6 +8,7 @@ import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.config.EnumAppWorkMode;
 import ru.datana.siemensopc.config.EnumFormatBytesType;
 import ru.datana.siemensopc.utils.AppException;
+import ru.datana.siemensopc.utils.BitOperationsUtils;
 import ru.datana.siemensopc.utils.FormatUtils;
 
 import java.text.SimpleDateFormat;
@@ -93,10 +94,10 @@ public class Moka7Executor implements IExecutor {
     private boolean readDataS7() {
         String method = "Чтение данных - ReadArea (datana edition)";
         TestBegin(method);
-        byte[] buffer = new byte[appOptions.getIntBytes()];
+        byte[] dataBytes = new byte[appOptions.getIntBytes()];
         int result = -1;
         try {
-            result = clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), buffer);
+            result = clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), dataBytes);
 
         } finally {
             TestEnd(method, result);
@@ -104,7 +105,8 @@ public class Moka7Executor implements IExecutor {
 
         if (result == 0) {
             log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + appOptions.getIntBytes() + " bytes");
-            FormatUtils.formatBytes(buffer, appOptions.getEnumViewFormatType());
+            FormatUtils.formatBytes(dataBytes, appOptions.getEnumViewFormatType());
+            BitOperationsUtils.doBitsOperations(dataBytes, appOptions);
             return true;
         }
         return false;

@@ -73,6 +73,9 @@ public class AppOptions {
     @Getter
     private EnumFormatBytesType enumViewFormatType;
 
+    @Getter
+    private boolean isActiveBitMode;
+
     public void load() throws AppException {
         Properties p = LanitFileUtils.readDataConfig();
         appVersion = ValueParser.readPropAsText(p, "app.version");
@@ -92,6 +95,7 @@ public class AppOptions {
         enumConnectionMoka7Type = ValueParser.readEnum(p, "moka7.connection.type", EnumConnectionMoka7Type.class, EnumConnectionMoka7Type.values());
 
 
+        isActiveBitMode = ValueParser.readBoolean(p, "mode.bits.is.active");
         bitSetMask = ValueParser.readBitSet(p, "bit.set.mask");
         bitFlipFromIndex = ValueParser.parseInt(p, "bit.flip.from.index");
         bitFlipToIndex = ValueParser.parseInt(p, "bit.flip.to.index");

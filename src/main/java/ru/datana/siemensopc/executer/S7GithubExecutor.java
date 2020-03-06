@@ -6,6 +6,7 @@ import com.github.s7connector.exception.S7Exception;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.utils.AppException;
+import ru.datana.siemensopc.utils.BitOperationsUtils;
 import ru.datana.siemensopc.utils.FormatUtils;
 
 @Slf4j
@@ -35,9 +36,10 @@ public class S7GithubExecutor implements IExecutor {
                                     .build();
 
                     //Read from DB100 10 bytes
-                    byte[] bs = connector.read(appOptions.getEnumS7DaveAreaType(), appOptions.getIntS7DBNumber(), appOptions.getIntBytes(), appOptions.getIntOffset());
+                    byte[] dataBytes = connector.read(appOptions.getEnumS7DaveAreaType(), appOptions.getIntS7DBNumber(), appOptions.getIntBytes(), appOptions.getIntOffset());
                     successCount++;
-                    FormatUtils.formatBytes(bs, appOptions.getEnumViewFormatType());
+                    FormatUtils.formatBytes(dataBytes, appOptions.getEnumViewFormatType());
+                    BitOperationsUtils.doBitsOperations(dataBytes, appOptions);
                     log.info("[Data: Шаг = " + step + ", Успешных шагов = " + successCount + " ]");
                     Thread.sleep(appOptions.getIntStepPauseMS());
                 } catch (S7Exception s7) {

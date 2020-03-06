@@ -42,12 +42,22 @@ public class Moka7Executor implements IExecutor {
         return "[Method: " + functionName + "] ";
     }
 
+    /**
+     * Учет времени работы, старт
+     *
+     * @param functionName имя для пользователя
+     */
     private void TestBegin(String functionName) {
         String prefix = prefixMethod(functionName);
         log.info(prefix + "==== старт ==== ");
         Elapsed = System.currentTimeMillis();
     }
 
+    /**
+     * Учет времени работы, окончание
+     *
+     * @param functionName имя для пользователя
+     */
     private void TestEnd(String functionName, int result) {
         String prefix = prefixMethod(functionName);
         if (result != 0) {
@@ -58,12 +68,24 @@ public class Moka7Executor implements IExecutor {
         log.info(prefix + " === Время выполнения = " + (System.currentTimeMillis() - Elapsed) + " ms");
     }
 
+    /**
+     * Вывод кода ошибки
+     *
+     * @param functionName для пояснения в лог об операции
+     * @param errorCode    код ошибки приложения (не контролера)
+     */
     private void Error(String functionName, int errorCode) {
         String prefix = prefixMethod(functionName) + "[Error] ";
         int sysErrorCode = clientS7.LastError;
         log.error(prefix + " Код ошибки = " + errorCode + ". Системный код ошибки = +" + sysErrorCode + ". Описание: " + S7Client.ErrorText(sysErrorCode));
     }
 
+    /**
+     * Вывод в лог мета инфы
+     *
+     * @param BlockType
+     * @param BlockNumber
+     */
     private void BlockInfo(int BlockType, int BlockNumber) {
         S7BlockInfo Block = new S7BlockInfo();
         String method = "Чтение блока";
@@ -97,6 +119,11 @@ public class Moka7Executor implements IExecutor {
 
     }
 
+    /**
+     * Чтенение данных, запись в лог
+     *
+     * @return признак успености: true - успешно
+     */
     private boolean readDataS7() {
         String method = "Чтение данных - ReadArea (datana edition)";
         TestBegin(method);
@@ -118,6 +145,11 @@ public class Moka7Executor implements IExecutor {
         return false;
     }
 
+    /**
+     * Чтение данных через АПИ Мока 7
+     *
+     * @param buffer -- массив нужно создать нужного размера заранее
+     */
     private void DBRead(byte[] buffer) {
         String method = "чтение блока";
         TestBegin(method);
@@ -134,6 +166,11 @@ public class Moka7Executor implements IExecutor {
         TestEnd(method, result);
     }
 
+    /**
+     * Запись данных через АПИ Мока 7
+     *
+     * @param buffer -- массив нужно создать нужного размера заранее
+     */
     private void DBWrite(byte[] buffer) {
         String method = "записиь данных";
         TestBegin(method);
@@ -150,6 +187,7 @@ public class Moka7Executor implements IExecutor {
     }
 
     /**
+     * Тесты для диагностики (не работает на демо-станде)
      * Performs read and write on a given DB
      */
     private void DBPlay() {
@@ -163,15 +201,19 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Пауза для избежания перегрузки контроллера от атаки запросов
+     */
     private void Delay() {
         try {
             Thread.sleep(appOptions.getIntStepPauseMS());
         } catch (InterruptedException e) {
-
-
         }
     }
 
+    /**
+     * Вывод статуса (не работает на демо-стенде)
+     */
     public void ShowStatus() {
         String method = "чтение статуса";
         String prefix = prefixMethod(method);
@@ -201,6 +243,9 @@ public class Moka7Executor implements IExecutor {
 
     }
 
+    /**
+     * Не знаю что это (не используется)
+     */
     public void DoRun() {
 
         String method = "PlcHotStart()";
@@ -215,6 +260,9 @@ public class Moka7Executor implements IExecutor {
             log.info("PLC Started");
     }
 
+    /**
+     * Не знаю что это (не используется)
+     */
     public void DoStop() {
         String method = "PlcStop()";
         TestBegin(method);
@@ -229,6 +277,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Не знаю что это (не используется)
+     */
     public void RunStop() {
         switch (CurrentStatus) {
             case S7.S7CpuStatusRun:
@@ -243,6 +294,9 @@ public class Moka7Executor implements IExecutor {
         }
     }
 
+    /**
+     * Для мета инфы (не работает на демо-стенде)
+     */
     public void GetSysInfo() {
         int result = -1;
         String method = "получение инфо о прошивке";

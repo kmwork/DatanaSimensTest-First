@@ -33,6 +33,8 @@ public class S7GithubExecutor implements IExecutor {
             for (int index = 1; successCount < appOptions.getIntLoopCount(); index++) {
                 int step = index + 1;
                 try {
+
+                    // подключение по протоколу сименса
                     S7Connector connector =
                             S7ConnectorFactory
                                     .buildTCPConnector()
@@ -41,20 +43,26 @@ public class S7GithubExecutor implements IExecutor {
                                     .withSlot(appOptions.getIntSlot()) //optional
                                     .build();
 
-                    //Read from DB100 10 bytes
+                    //читаем данные
                     byte[] dataBytes = connector.read(appOptions.getEnumS7DaveAreaType(), appOptions.getIntS7DBNumber(), appOptions.getIntBytes(), appOptions.getIntOffset());
+
+                    //учет успешных попыток
                     successCount++;
+
+                    //вывод байтов в лог
                     FormatUtils.formatBytes("ОРИГИНАЛ", dataBytes, appOptions.getEnumViewFormatType());
+
+                    //битовые преобразование - вырезание отдельных битов
                     BitOperationsUtils.doBitsOperations(dataBytes, appOptions);
                     log.info("[Data: Шаг = " + step + ", Успешных шагов = " + successCount + " ]");
+
+                    //пауза -- нужно дать отдохнуть контроллеру
                     Thread.sleep(appOptions.getIntStepPauseMS());
                 } catch (S7Exception s7) {
                     log.error("[ERROR-DATA: Шаг = " + step + ", Ошибка", s7);
                     errorCount++;
                 }
             }
-
-
             log.info("[ИТОГ: Успешных шагов = " + successCount + ", Ошибочных попыток =  " + errorCount);
         } catch (InterruptedException e) {
             log.error("[App-Error: Аварийное завершение программы: ", e);

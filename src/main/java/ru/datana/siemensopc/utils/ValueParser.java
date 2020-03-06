@@ -89,7 +89,7 @@ public class ValueParser {
             byte[] bytes = new byte[strBytes.length];
             for (index = 0; index < strBytes.length; index++) {
                 hex = strBytes[index];
-                byte valueByte = Byte.parseByte(hex, 16);
+                bytes[index] = Byte.parseByte(hex, 16);
             }
             BitSet result = BitSet.valueOf(bytes);
             log.debug(PREFIX_LOG + "[BitSet: " + userNameField + " = " + result);

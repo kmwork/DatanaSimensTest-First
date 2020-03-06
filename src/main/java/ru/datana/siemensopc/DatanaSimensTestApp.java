@@ -41,7 +41,6 @@ public class DatanaSimensTestApp {
 
     public static void main(String[] args) {
         log.info(AppConts.APP_LOG_PREFIX + "================ Запуск  ================. Аргументы = " + Arrays.toString(args));
-        log.info(AppConts.APP_LOG_PREFIX + "Версия: V3");
         try {
             AppOptions appOptions = new AppOptions();
             try {
@@ -51,7 +50,7 @@ public class DatanaSimensTestApp {
                 return;
             }
             AppLibraryType type = appOptions.getAppLibraryType();
-            log.info(AppConts.APP_LOG_PREFIX + " ВЫБРАН АЛГОРИТМ " + type);
+            log.info(AppConts.APP_LOG_PREFIX + "****** Аргорим: " + type + ", Версия программы = " + appOptions.getAppVersion());
             IExecutor executor = null;
             if (type == AppLibraryType.MOKA7)
                 executor = new Moka7Executor(appOptions);

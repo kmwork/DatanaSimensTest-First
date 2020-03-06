@@ -53,8 +53,12 @@ public class AppOptions {
     @Getter
     private DaveArea enumS7DaveAreaType;
 
+    @Getter
+    private String appVersion;
+
     public void load() throws AppException {
         Properties p = LanitFileUtils.readDataConfig();
+        appVersion = ValueParser.readPropAsText(p, "app.version");
         ipHost = ValueParser.readPropAsText(p, "host");
         intRack = ValueParser.parseInt(p, "rack");
         intSlot = ValueParser.parseInt(p, "slot");

@@ -107,9 +107,8 @@ public class Moka7Executor implements IExecutor {
         }
 
         if (result == 0) {
-            DataToMove = SizeRead.Value; // Stores DB size for next test
-            log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + DataToMove + " bytes");
-            FormatUtils.hexDump(Buffer, DataToMove);
+            log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + appOptions.getIntBytes() + " bytes");
+            FormatUtils.hexDump(Buffer, appOptions.getIntBytes());
             return true;
         }
         return false;

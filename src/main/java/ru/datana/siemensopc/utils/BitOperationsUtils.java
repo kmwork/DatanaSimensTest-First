@@ -11,7 +11,7 @@ public class BitOperationsUtils {
     private static String PREFIX_LOG = "[Битовые преобразования] ";
 
     public static byte[] doBitsOperations(byte[] data, AppOptions appOptions) {
-        if (appOptions.isActiveBitMode()) {
+        if (!appOptions.isActiveBitMode()) {
             log.info(PREFIX_LOG + " пропушено");
             return data;
         }

@@ -1,6 +1,7 @@
 package ru.datana.siemensopc.executer;
 
 import Moka7.*;
+import com.github.s7connector.exception.S7Exception;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppOptions;
@@ -424,18 +425,27 @@ public class Moka7Executor implements IExecutor {
     }
 
     private void danataReadTest() {
-
-        String method = "Пробная чтение нужного размера";
-        TestBegin(method);
-        boolean isSuccess = false;
-        try {
-            isSuccess = readDataS7();
-            if (isSuccess) {
-                log.info("[Чтение данных] Упешно прочитано");
+        String predfix = prefixMethod("Цикл чтения");
+        log.info(predfix + " Кол-во шагов = " + appOptions.getIntLoopCount() + " по " + appOptions.getIntBytes() + " байт");
+        int successReadCount = 0;
+        int errorReadCount = 0;
+        for (int index = 1; successReadCount < appOptions.getIntLoopCount(); index++) {
+            int step = index + 1;
+            try {
+                boolean isOk = readDataS7();
+                if (isOk)
+                    successReadCount++;
+                else errorReadCount++;
+                Thread.sleep(appOptions.getIntStepPauseMS());
+            } catch (S7Exception | InterruptedException s7) {
+                log.error("[ERROR-DATA: Шаг = " + step + ", Ошибка", s7);
+                errorReadCount++;
             }
-        } finally {
-            TestEnd(method, isSuccess ? 0 : -1);
         }
+
+
+        log.info("[ИТОГ: Успешных шагов = " + successReadCount + ", Ошибочных попыток =  " + errorReadCount);
     }
+
 
 }

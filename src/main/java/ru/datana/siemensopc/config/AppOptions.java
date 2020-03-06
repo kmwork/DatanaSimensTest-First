@@ -80,7 +80,7 @@ public class AppOptions {
         intRack = ValueParser.parseInt(p, "rack");
         intSlot = ValueParser.parseInt(p, "slot");
         intBytes = ValueParser.parseInt(p, "bytes.count");
-        intOffset = ValueParser.parseInt(p, "offset");
+        intOffset = ValueParser.parseInt(p, "offset.bytes");
         intLoopCount = ValueParser.parseInt(p, "loop.count");
         intS7DBNumber = ValueParser.parseInt(p, "s7.db.number");
         enumMoka7AreaType = ValueParser.readEnum(p, "library.moka7.area.type", EnumS7Area.class, EnumS7Area.values());

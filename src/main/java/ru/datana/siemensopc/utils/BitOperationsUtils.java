@@ -16,7 +16,7 @@ public class BitOperationsUtils {
         bisSet.and(options.getBitSetMask());
         bisSet.flip(options.getBitFlipFromIndex(), options.getBitFlipToIndex());
         byte[] result = bisSet.toByteArray();
-        FormatUtils.formatBytes(result, options);
+        FormatUtils.formatBytes(result, options.getEnumViewFormatType());
         return result;
     }
 }

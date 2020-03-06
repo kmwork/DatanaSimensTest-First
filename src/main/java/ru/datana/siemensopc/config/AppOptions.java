@@ -4,6 +4,7 @@ import com.github.s7connector.api.DaveArea;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import ru.datana.siemensopc.moka.contants.EnumConnectionMoka7Type;
 import ru.datana.siemensopc.moka.contants.EnumS7Area;
 import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.LanitFileUtils;
@@ -56,6 +57,9 @@ public class AppOptions {
     @Getter
     private String appVersion;
 
+    @Getter
+    private EnumConnectionMoka7Type enumConnectionMoka7Type;
+
     public void load() throws AppException {
         Properties p = LanitFileUtils.readDataConfig();
         appVersion = ValueParser.readPropAsText(p, "app.version");
@@ -72,7 +76,7 @@ public class AppOptions {
         intStepPauseMS = ValueParser.parseInt(p, "step.pause.ms");
         appLibraryType = ValueParser.readEnum(p, "app.library.type", AppLibraryType.class, AppLibraryType.values());
         enumS7DaveAreaType = ValueParser.readEnum(p, "library.s7.area.type", DaveArea.class, DaveArea.values());
-
+        enumConnectionMoka7Type = ValueParser.readEnum(p, "moka7.connection.type", EnumConnectionMoka7Type.class, EnumConnectionMoka7Type.values());
 
         log.info("[Настройки] Параметры = " + toString());
 

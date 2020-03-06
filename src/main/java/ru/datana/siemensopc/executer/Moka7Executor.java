@@ -1,9 +1,5 @@
 package ru.datana.siemensopc.executer;
 
-/**
- * @author Dave Nardella
- */
-
 import Moka7.*;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppConts;
@@ -370,8 +366,8 @@ public class Moka7Executor implements IExecutor {
         int result = -1;
         try {
             //kmwork-rem
-            clientS7.SetConnectionType(S7.OP);
-            //clientS7.SetConnectionType(S7.S7_BASIC);
+            //clientS7.SetConnectionType(S7.OP);
+            clientS7.SetConnectionType(appOptions.getEnumConnectionMoka7Type().getCode());
             result = clientS7.ConnectTo(appOptions.getIpHost(), appOptions.getIntRack(), appOptions.getIntSlot());
             if (result == 0) {
                 log.info(prefix + "Connected to   : " + appOptions.getIpHost() + " (Rack=" + appOptions.getIntRack() + ", Slot=" + appOptions.getIntSlot() + ")");
@@ -408,15 +404,18 @@ public class Moka7Executor implements IExecutor {
             failedCount = 0;
 
             boolean isConnect = connectMoka7();
-            if (isConnect) {
-                if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST)
-                    performTests();
-                else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)
-                    danataReadTest();
-                else
-                    log.error(AppConts.ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
-
-
+            try {
+                if (isConnect) {
+                    if (appOptions.getAppWorkMode() == EnumAppWorkMode.TEST)
+                        performTests();
+                    else if (appOptions.getAppWorkMode() == EnumAppWorkMode.READ)
+                        danataReadTest();
+                    else
+                        log.error(AppConts.ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
+                }
+            } finally {
+                log.info(AppConts.APP_LOG_PREFIX + " делаем Disconnect");
+                clientS7.Disconnect();
             }
 
 

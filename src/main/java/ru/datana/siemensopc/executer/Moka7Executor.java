@@ -17,7 +17,9 @@ import java.util.Date;
 
 /**
  * Движок на Moka7
- * на базе кода из
+ * на базе кода из реализация для Java (Moka7)
+ * <p>
+ * http://snap7.sourceforge.net/
  */
 @Slf4j
 public class Moka7Executor implements IExecutor {

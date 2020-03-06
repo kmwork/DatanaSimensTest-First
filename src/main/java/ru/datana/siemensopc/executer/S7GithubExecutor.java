@@ -11,6 +11,9 @@ import ru.datana.siemensopc.utils.FormatUtils;
 
 /**
  * Движок от GitHub (упрещенное апи - поключил через зависимость мавен)
+ * <p>
+ * взято из s7connector
+ * https://github.com/s7connector/s7connector
  */
 @Slf4j
 public class S7GithubExecutor implements IExecutor {

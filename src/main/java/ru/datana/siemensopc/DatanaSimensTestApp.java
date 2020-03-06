@@ -25,6 +25,8 @@ package ru.datana.siemensopc;
  * Тестовое ПО на проверку дачтиков сименс
  * по заданию https://conf.dds.lanit.ru/pages/viewpage.action?pageId=43683525
  * pdf  (tech_task.pdf) с заданием в папке doc-manual
+ * <p>
+ * для контролера Siemens S7 1200 (https://new.siemens.com/ru/ru/produkty/avtomatizacia/sistemy-avtomatizacii/promyshlennye-sistemy-simatic/kontroller-simatic/s7-1200.html)
  */
 
 import lombok.extern.slf4j.Slf4j;

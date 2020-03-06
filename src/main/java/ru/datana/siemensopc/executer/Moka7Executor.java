@@ -105,7 +105,7 @@ public class Moka7Executor implements IExecutor {
 
         if (result == 0) {
             log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + appOptions.getIntBytes() + " bytes");
-            FormatUtils.formatBytes(dataBytes, appOptions.getEnumViewFormatType());
+            FormatUtils.formatBytes("Оригинальные байты", dataBytes, appOptions.getEnumViewFormatType());
             BitOperationsUtils.doBitsOperations(dataBytes, appOptions);
             return true;
         }
@@ -325,7 +325,7 @@ public class Moka7Executor implements IExecutor {
                 log.info("Size    : " + SZL.DataSize);
 
                 byte[] forView = Arrays.copyOf(SZL.Data, SZL.DataSize);
-                FormatUtils.formatBytes(SZL.Data, EnumFormatBytesType.HEX);
+                FormatUtils.formatBytes("Мета-Инфа", SZL.Data, EnumFormatBytesType.HEX);
             }
         } finally {
             TestEnd(method, result);

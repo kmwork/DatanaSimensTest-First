@@ -21,7 +21,7 @@ public class BitOperationsUtils {
         bisSet.and(appOptions.getBitSetMask());
         bisSet.flip(appOptions.getBitFlipFromIndex(), appOptions.getBitFlipToIndex());
         byte[] result = bisSet.toByteArray();
-        FormatUtils.formatBytes(result, appOptions.getEnumViewFormatType());
+        FormatUtils.formatBytes("Обработанные биты", result, appOptions.getEnumViewFormatType());
         return result;
     }
 }

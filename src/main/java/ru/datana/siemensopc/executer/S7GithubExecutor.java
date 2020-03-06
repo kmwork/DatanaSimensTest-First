@@ -38,7 +38,7 @@ public class S7GithubExecutor implements IExecutor {
                     //Read from DB100 10 bytes
                     byte[] dataBytes = connector.read(appOptions.getEnumS7DaveAreaType(), appOptions.getIntS7DBNumber(), appOptions.getIntBytes(), appOptions.getIntOffset());
                     successCount++;
-                    FormatUtils.formatBytes(dataBytes, appOptions.getEnumViewFormatType());
+                    FormatUtils.formatBytes("ОРИГИНАЛ", dataBytes, appOptions.getEnumViewFormatType());
                     BitOperationsUtils.doBitsOperations(dataBytes, appOptions);
                     log.info("[Data: Шаг = " + step + ", Успешных шагов = " + successCount + " ]");
                     Thread.sleep(appOptions.getIntStepPauseMS());

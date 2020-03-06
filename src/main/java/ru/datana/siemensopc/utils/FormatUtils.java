@@ -9,18 +9,19 @@ import java.util.Arrays;
 @Slf4j
 public class FormatUtils {
 
-    private static final String PREFIX_LOG = "[Dump] ";
 
-    public static void formatBytes(byte[] buffer, EnumFormatBytesType typeFormat) {
-        log.info(PREFIX_LOG + " ============== Начало блока ==============");
+    public static void formatBytes(String methodName, byte[] buffer, EnumFormatBytesType typeFormat) {
+        String prefixLog = "[DUMP] [Источник:" + methodName + "] ";
+
+        log.info(prefixLog + " ============== Начало блока ==============");
         if (buffer == null || buffer.length == 0) {
-            log.warn(PREFIX_LOG + "<ПУСТО>");
+            log.warn(prefixLog + "<ПУСТО>");
             return;
         }
 
 
         if (typeFormat == EnumFormatBytesType.CLASSIC) {
-            log.info(PREFIX_LOG + " десятичные числа по байтам: " + Arrays.toString(buffer));
+            log.info(prefixLog + " десятичные числа по байтам: " + Arrays.toString(buffer));
 
         } else {
             int r = 0;
@@ -39,7 +40,7 @@ public class FormatUtils {
 
                 r++;
                 if (r == 16) {
-                    log.info(PREFIX_LOG + hexStringBuffer + " " + S7.GetPrintableStringAt(buffer, i - 15, 16));
+                    log.info(prefixLog + hexStringBuffer + " " + S7.GetPrintableStringAt(buffer, i - 15, 16));
                     hexStringBuffer = new StringBuilder();
                     r = 0;
                 }
@@ -48,10 +49,10 @@ public class FormatUtils {
             if (L > 0) {
                 while (hexStringBuffer.length() < 49)
                     hexStringBuffer.append(" ");
-                log.info(PREFIX_LOG + hexStringBuffer + S7.GetPrintableStringAt(buffer, buffer.length - r, r));
+                log.info(prefixLog + hexStringBuffer + S7.GetPrintableStringAt(buffer, buffer.length - r, r));
             } else
-                log.info(PREFIX_LOG + "<ПУСТО>");
+                log.info(prefixLog + "<ПУСТО>");
         }
-        log.info(PREFIX_LOG + " ============== Конец блока ==============");
+        log.info(prefixLog + " ============== Конец блока ==============");
     }
 }

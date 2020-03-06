@@ -22,7 +22,7 @@
 package ru.datana.siemensopc;
 
 /**
- * @author Dave Nardella
+ * Тестовое ПО на проверку дачтиков сименс
  */
 
 import lombok.extern.slf4j.Slf4j;

@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppConts;
 import ru.datana.siemensopc.config.AppOptions;
 import ru.datana.siemensopc.config.EnumAppWorkMode;
+import ru.datana.siemensopc.config.EnumFormatBytesType;
 import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.FormatUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 @Slf4j
@@ -17,7 +19,6 @@ public class Moka7Executor implements IExecutor {
 
 
     private long Elapsed;
-    private byte[] Buffer = new byte[65536]; // 64K buffer (maximum for S7400 systems)
     private final S7Client clientS7 = new S7Client();
     private int successCount = 0;
     private int failedCount = 0;
@@ -90,18 +91,12 @@ public class Moka7Executor implements IExecutor {
     }
 
     private boolean readDataS7() {
-        IntByRef SizeRead = new IntByRef(0);
-
         String method = "Чтение данных - ReadArea (datana edition)";
         TestBegin(method);
+        byte[] buffer = new byte[appOptions.getIntBytes()];
         int result = -1;
         try {
-
-            //оригинал
-            //clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
-
-            //kostya-verion-rem
-            result = clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), Buffer);
+            result = clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), buffer);
 
         } finally {
             TestEnd(method, result);
@@ -109,18 +104,19 @@ public class Moka7Executor implements IExecutor {
 
         if (result == 0) {
             log.info("DB " + appOptions.getIntS7DBNumber() + " - Size read " + appOptions.getIntBytes() + " bytes");
-            FormatUtils.hexDump(Buffer, appOptions.getIntBytes());
+            FormatUtils.formatBytes(buffer, appOptions.getEnumViewFormatType());
             return true;
         }
         return false;
     }
 
-    private void DBRead() {
+    private void DBRead(byte[] buffer) {
         String method = "чтение блока";
         TestBegin(method);
         int result = -1;
+
         try {
-            clientS7.ReadArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
+            clientS7.ReadArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, buffer);
         } finally {
             TestEnd(method, result);
         }
@@ -130,12 +126,12 @@ public class Moka7Executor implements IExecutor {
         TestEnd(method, result);
     }
 
-    private void DBWrite() {
+    private void DBWrite(byte[] buffer) {
         String method = "записиь данных";
         TestBegin(method);
         int result = -1;
         try {
-            result = clientS7.WriteArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), DataToMove, Buffer);
+            result = clientS7.WriteArea(appOptions.getEnumMoka7AreaType().getS7AreaCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), buffer.length, buffer);
         } finally {
             TestEnd(method, result);
         }
@@ -151,10 +147,11 @@ public class Moka7Executor implements IExecutor {
     private void DBPlay() {
         // We use DBSample (default = DB 1) as DB Number
         // modify it if it doesn't exists into the CPU.
+        byte[] buffer = new byte[appOptions.getIntBytes()];
         if (readDataS7()) {
-            DBRead();
+            DBRead(buffer);
             if (appOptions.isAppMakeAllTests())
-                DBWrite();
+                DBWrite(buffer);
         }
     }
 
@@ -324,7 +321,9 @@ public class Moka7Executor implements IExecutor {
                 log.info("LENTHDR : " + SZL.LENTHDR);
                 log.info("N_DR    : " + SZL.N_DR);
                 log.info("Size    : " + SZL.DataSize);
-                FormatUtils.hexDump(SZL.Data, SZL.DataSize);
+
+                byte[] forView = Arrays.copyOf(SZL.Data, SZL.DataSize);
+                FormatUtils.formatBytes(SZL.Data, EnumFormatBytesType.HEX);
             }
         } finally {
             TestEnd(method, result);

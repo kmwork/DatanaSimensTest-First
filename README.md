@@ -8,3 +8,6 @@
 
 ### примерный синтаксис команды
 `java -jar target/Siemens-K4-1.0-SNAPSHOT-jar-with-dependencies.jar -Dapp.dir=<путь к папке config>`
+
+## настройка
+файл `datana_siemens.properties` c настройками

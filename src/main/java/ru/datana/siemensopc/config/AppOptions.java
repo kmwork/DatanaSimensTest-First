@@ -10,6 +10,7 @@ import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.LanitFileUtils;
 import ru.datana.siemensopc.utils.ValueParser;
 
+import java.util.BitSet;
 import java.util.Properties;
 
 @ToString
@@ -60,6 +61,18 @@ public class AppOptions {
     @Getter
     private EnumConnectionMoka7Type enumConnectionMoka7Type;
 
+    @Getter
+    private BitSet bitSetMask;
+
+    @Getter
+    private int bitFlipFromIndex;
+
+    @Getter
+    private int bitFlipToIndex;
+
+    @Getter
+    private EnumFormatBytesType enumViewFormatType;
+
     public void load() throws AppException {
         Properties p = LanitFileUtils.readDataConfig();
         appVersion = ValueParser.readPropAsText(p, "app.version");
@@ -77,6 +90,12 @@ public class AppOptions {
         appLibraryType = ValueParser.readEnum(p, "app.library.type", AppLibraryType.class, AppLibraryType.values());
         enumS7DaveAreaType = ValueParser.readEnum(p, "library.s7.area.type", DaveArea.class, DaveArea.values());
         enumConnectionMoka7Type = ValueParser.readEnum(p, "moka7.connection.type", EnumConnectionMoka7Type.class, EnumConnectionMoka7Type.values());
+
+
+        bitSetMask = ValueParser.readBitSet(p, "bit.set.mask");
+        bitFlipFromIndex = ValueParser.parseInt(p, "bit.flip.from.index");
+        bitFlipToIndex = ValueParser.parseInt(p, "bit.flip.to.index");
+        enumViewFormatType = ValueParser.readEnum(p, "view.bytes.type", EnumFormatBytesType.class, EnumFormatBytesType.values());
 
         log.info("[Настройки] Параметры = " + toString());
 

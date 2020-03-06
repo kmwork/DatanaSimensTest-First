@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Properties;
 
 @Slf4j
@@ -75,5 +76,26 @@ public class ValueParser {
         if (!strBoolean.equals("TRUE") && strBoolean.equals("FALSE"))
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно булево значение  TRUE/FALSE", args, null);
         return strBoolean.equals("TRUE");
+    }
+
+    public static BitSet readBitSet(Properties p, String userNameField) throws AppException {
+        String strBoolean = readPropAsText(p, userNameField, true);
+
+        String args = "как массив бит: значение =" + strBoolean;
+        int index = -1;
+        String hex = null;
+        try {
+            String strBytes[] = strBoolean.split(" ");
+            byte[] bytes = new byte[strBytes.length];
+            for (index = 0; index < strBytes.length; index++) {
+                hex = strBytes[index];
+                byte valueByte = Byte.parseByte(hex, 16);
+            }
+            BitSet result = BitSet.valueOf(bytes);
+            log.debug(PREFIX_LOG + "[BitSet: " + userNameField + " = " + result);
+            return result;
+        } catch (NumberFormatException ex) {
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно булево значение в hex = " + hex + ", index = " + index, args, null);
+        }
     }
 }

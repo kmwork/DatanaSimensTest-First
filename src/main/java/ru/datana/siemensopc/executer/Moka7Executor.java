@@ -104,7 +104,7 @@ public class Moka7Executor implements IExecutor {
             //clientS7.DBGet(appOptions.getIntS7DBNumber(), Buffer, SizeRead);
 
             //kostya-verion-rem
-            clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), Buffer);
+            result = clientS7.ReadArea(appOptions.getEnumS7DaveAreaType().getCode(), appOptions.getIntS7DBNumber(), appOptions.getIntOffset(), appOptions.getIntBytes(), Buffer);
 
         } finally {
             TestEnd(method, result);

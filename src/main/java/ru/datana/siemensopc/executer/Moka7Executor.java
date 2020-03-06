@@ -538,7 +538,7 @@ public class Moka7Executor implements IExecutor {
         }
 
 
-        log.info("[ИТОГ: Успешных шагов = " + successReadCount + ", Ошибочных попыток =  " + errorReadCount);
+        log.info("[ИТОГ] : Успешных шагов = " + successReadCount + ", Ошибочных попыток =  " + errorReadCount);
     }
 
 

@@ -5,10 +5,13 @@
 `mvn clean compile assembly:single`
 
 ## Как пользоваться
-после сборки мавеном, из папки etc для bat и sh командые файлы
+после сборки мавеном, из папки <this project>/etc для bat и sh командые файлы
 
 ### примерный синтаксис команды
 `java -jar target/Siemens-K4-1.0-SNAPSHOT-jar-with-dependencies.jar -Dapp.dir=<путь к папке config>`
 
 ## настройка
 файл `datana_siemens.properties` c настройками
+
+## техническая документация 
+в папке <this project>/doc-manual

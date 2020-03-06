@@ -5,6 +5,9 @@ import ru.datana.siemensopc.config.AppOptions;
 
 import java.util.BitSet;
 
+/**
+ * Битовые преобразование сдвигов и бинарных AND
+ */
 @Slf4j
 public class BitOperationsUtils {
 

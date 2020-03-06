@@ -1,5 +1,8 @@
 package ru.datana.siemensopc.config;
 
+/**
+ * Константы программы
+ */
 public class AppConts {
 
     public static final String CONF_FILE_NAME = "datana_siemens.properties";

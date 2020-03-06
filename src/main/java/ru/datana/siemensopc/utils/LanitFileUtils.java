@@ -6,6 +6,9 @@ import ru.datana.siemensopc.config.AppConts;
 import java.io.*;
 import java.util.Properties;
 
+/**
+ * Чтение конфига datana_siemens.properties
+ */
 @Slf4j
 public class LanitFileUtils {
 

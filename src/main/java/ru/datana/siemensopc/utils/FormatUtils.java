@@ -6,6 +6,10 @@ import ru.datana.siemensopc.config.EnumFormatBytesType;
 
 import java.util.Arrays;
 
+/**
+ * Формирование байтов в лог
+ * в hex и десятичном формате
+ */
 @Slf4j
 public class FormatUtils {
 

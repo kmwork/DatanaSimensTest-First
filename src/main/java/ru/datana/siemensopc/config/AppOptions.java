@@ -12,6 +12,9 @@ import ru.datana.siemensopc.utils.ValueParser;
 
 import java.util.Properties;
 
+/**
+ * POJO для конфига из парсинга конфига datana_siemens.properties
+ */
 @ToString
 @Slf4j
 public class AppOptions {

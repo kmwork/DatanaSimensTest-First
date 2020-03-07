@@ -394,7 +394,7 @@ public class Moka7Executor implements IExecutor {
                 log.info("Size    : " + SZL.DataSize);
 
                 byte[] forView = Arrays.copyOf(SZL.Data, SZL.DataSize);
-                FormatUtils.formatBytes("Мета-Инфа", SZL.Data, EnumFormatBytesType.HEX);
+                FormatUtils.formatBytes("Мета-Инфа", forView, EnumFormatBytesType.HEX_WITH_TEXT);
             }
         } finally {
             TestEnd(method, result);

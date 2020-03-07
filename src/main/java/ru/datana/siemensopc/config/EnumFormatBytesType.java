@@ -5,6 +5,7 @@ package ru.datana.siemensopc.config;
  */
 public enum EnumFormatBytesType {
     CLASSIC,
-    HEX,
-    BIG_INTEGER
+    HEX_NUMBER,
+    DECIMAL_NUMBER,
+    HEX_WITH_TEXT
 }

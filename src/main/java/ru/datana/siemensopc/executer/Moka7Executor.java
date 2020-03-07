@@ -124,7 +124,7 @@ public class Moka7Executor implements IExecutor {
      *
      * @return признак успености: true - успешно
      */
-    private boolean readDataS7() {
+    private boolean readDataS7() throws AppException {
         String method = "Чтение данных - ReadArea (datana edition)";
         TestBegin(method);
         byte[] dataBytes = new byte[appOptions.getIntBytes()];
@@ -190,7 +190,7 @@ public class Moka7Executor implements IExecutor {
      * Тесты для диагностики (не работает на демо-станде)
      * Performs read and write on a given DB
      */
-    private void DBPlay() {
+    private void DBPlay() throws AppException {
         // We use DBSample (default = DB 1) as DB Number
         // modify it if it doesn't exists into the CPU.
         byte[] buffer = new byte[appOptions.getIntBytes()];
@@ -381,7 +381,7 @@ public class Moka7Executor implements IExecutor {
     /**
      * Для мета инфы (не работает на демо-стенде)
      */
-    public void ReadSzl() {
+    public void ReadSzl() throws AppException {
         String method = "чтение килобайта";
         S7Szl SZL = new S7Szl(1024);
         TestBegin(method);
@@ -463,7 +463,7 @@ public class Moka7Executor implements IExecutor {
     /**
      * Диагностика (не работает на демо-стенде)
      */
-    public void performTests() {
+    public void performTests() throws AppException {
         GetSysInfo();
         GetProtectionScheme();
         GetDateAndTime();
@@ -531,7 +531,7 @@ public class Moka7Executor implements IExecutor {
                     successReadCount++;
                 else errorReadCount++;
                 Thread.sleep(appOptions.getIntStepPauseMS());
-            } catch (S7Exception | InterruptedException s7) {
+            } catch (S7Exception | InterruptedException | AppException s7) {
                 log.error("[ERROR-DATA: Шаг = " + step + ", Ошибка", s7);
                 errorReadCount++;
             }

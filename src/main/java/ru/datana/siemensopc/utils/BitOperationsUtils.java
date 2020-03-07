@@ -3,7 +3,7 @@ package ru.datana.siemensopc.utils;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppOptions;
 
-import java.util.BitSet;
+import java.math.BigInteger;
 
 /**
  * Битовые преобразование сдвигов и бинарных AND
@@ -13,7 +13,7 @@ public class BitOperationsUtils {
 
     private static String PREFIX_LOG = "[Битовые преобразования] ";
 
-    public static byte[] doBitsOperations(byte[] data, AppOptions appOptions) {
+    public static byte[] doBitsOperations(byte[] data, AppOptions appOptions) throws AppException {
 
         if (data == null || data.length == 0) {
             log.info(PREFIX_LOG + " Пустые данные");
@@ -37,9 +37,9 @@ public class BitOperationsUtils {
         }
 
         log.info(PREFIX_LOG + " запушено битовое преобразование");
-        BitSet bisSet = BitSet.valueOf(resultAnd);
-        bisSet.flip(appOptions.getBitFlipFromIndex(), appOptions.getBitFlipToIndex());
-        byte[] result = bisSet.toByteArray();
+        BigInteger bigInteger = new BigInteger(resultAnd);
+        BigInteger resultBigInt = bigInteger.divide(appOptions.getBigIntegerDivide());
+        byte[] result = resultBigInt.toByteArray();
         FormatUtils.formatBytes("Обработанные биты", result, appOptions.getEnumViewFormatType());
         return result;
     }

@@ -3,6 +3,7 @@ package ru.datana.siemensopc.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -33,6 +34,24 @@ public class ValueParser {
 
     public static String readPropAsText(Properties p, String userNameField) throws AppException {
         return readPropAsText(p, userNameField, true);
+    }
+
+
+    public static long parseLong(String strValue, String userNameField) throws AppException {
+        log.trace(PREFIX_LOG + ": parse as Long for Field [" + userNameField + "] = " + strValue);
+        String args = userNameField + " = '" + strValue + "'";
+        if (StringUtils.isEmpty(strValue)) {
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "пустое значение", args, null);
+        }
+
+        try {
+            long value = Long.parseLong(strValue.trim());
+            log.trace(PREFIX_LOG + ": success parsing: [" + userNameField + "] = " + value);
+            return value;
+        } catch (NumberFormatException ex) {
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, "не верное целое число", args, ex);
+        }
+
     }
 
     public static int parseInt(String strValue, String userNameField) throws AppException {
@@ -78,13 +97,13 @@ public class ValueParser {
     }
 
     public static byte[] readBytes(Properties p, String userNameField) throws AppException {
-        String strBoolean = readPropAsText(p, userNameField, true);
+        String strBytesLine = readPropAsText(p, userNameField, true);
 
-        String args = "как массив бит: значение =" + strBoolean;
+        String args = "как массив бит: значение =" + strBytesLine;
         int index = -1;
         String hex = null;
         try {
-            String strBytes[] = strBoolean.split(" ");
+            String strBytes[] = strBytesLine.split(" ");
             byte[] bytes = new byte[strBytes.length];
             for (index = 0; index < strBytes.length; index++) {
                 hex = strBytes[index];
@@ -92,9 +111,21 @@ public class ValueParser {
             }
             log.debug(PREFIX_LOG + "[BitSet: " + userNameField + " = " + Arrays.toString(bytes));
             return bytes;
-        } catch (NumberFormatException ex) {
+        } catch (Exception ex) {
             throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно значение в hex = " + hex + ", index = " + index, args, ex);
         }
     }
 
+    public static BigInteger readBigInteger(Properties p, String userNameField) throws AppException {
+        String strBigInt = readPropAsText(p, userNameField, true);
+
+        String args = "как большое число: значение =" + strBigInt;
+        int index = -1;
+        String hex = null;
+        try {
+            return new BigInteger(strBigInt, 10);
+        } catch (Exception ex) {
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " не верно значение в hex = " + hex + ", index = " + index, args, ex);
+        }
+    }
 }

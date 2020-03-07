@@ -10,6 +10,7 @@ import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.LanitFileUtils;
 import ru.datana.siemensopc.utils.ValueParser;
 
+import java.math.BigInteger;
 import java.util.Properties;
 
 /**
@@ -78,6 +79,9 @@ public class AppOptions {
     @Getter
     private boolean isActiveBitMode;
 
+    @Getter
+    private BigInteger bigIntegerDivide;
+
     public void load() throws AppException {
         Properties p = LanitFileUtils.readDataConfig();
         appVersion = ValueParser.readPropAsText(p, "app.version");
@@ -96,14 +100,14 @@ public class AppOptions {
         enumS7DaveAreaType = ValueParser.readEnum(p, "library.s7.area.type", DaveArea.class, DaveArea.values());
         enumConnectionMoka7Type = ValueParser.readEnum(p, "moka7.connection.type", EnumConnectionMoka7Type.class, EnumConnectionMoka7Type.values());
 
-
         isActiveBitMode = ValueParser.readBoolean(p, "mode.bits.is.active");
         bytesMaskOperationAnd = ValueParser.readBytes(p, "bytes.mask.operation.and");
-        bitFlipFromIndex = ValueParser.parseInt(p, "bit.flip.from.index");
-        bitFlipToIndex = ValueParser.parseInt(p, "bit.flip.to.index");
+        bigIntegerDivide = ValueParser.readBigInteger(p, "big.integer.operation.division");
+
         enumViewFormatType = ValueParser.readEnum(p, "view.bytes.type", EnumFormatBytesType.class, EnumFormatBytesType.values());
 
         log.info("[Настройки] Параметры = " + toString());
 
     }
+
 }

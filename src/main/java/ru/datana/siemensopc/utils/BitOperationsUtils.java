@@ -1,9 +1,12 @@
 package ru.datana.siemensopc.utils;
 
+import Moka7.S7;
 import lombok.extern.slf4j.Slf4j;
 import ru.datana.siemensopc.config.AppOptions;
+import ru.datana.siemensopc.config.EnumSiemensDataType;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.util.Arrays;
 
 /**
  * Битовые преобразование сдвигов и бинарных AND
@@ -11,36 +14,37 @@ import java.math.BigInteger;
 @Slf4j
 public class BitOperationsUtils {
 
-    private static String PREFIX_LOG = "[Битовые преобразования] ";
+    private static String PREFIX_LOG = "[Приведение к типу] ";
 
-    public static byte[] doBitsOperations(byte[] data, AppOptions appOptions) throws AppException {
+    public static BigDecimal doBitsOperations(byte[] data, AppOptions appOptions) throws AppException {
 
         if (data == null || data.length == 0) {
             log.info(PREFIX_LOG + " Пустые данные");
             return null;
         }
 
-
-        if (!appOptions.isActiveBitMode()) {
-            log.info(PREFIX_LOG + " пропушено");
-            return data;
+        BigDecimal result;
+        EnumSiemensDataType type = appOptions.getDataType();
+        if (type == EnumSiemensDataType.TYPE_BIT) {
+            boolean bitBoolean = S7.GetBitAt(data, 0, appOptions.getIntBitPosition());
+            result = new BigDecimal(bitBoolean ? 1 : 0);
+        } else if (type == EnumSiemensDataType.TYPE_BYTE) {
+            result = new BigDecimal((int) data[0]);
+        } else if (type == EnumSiemensDataType.TYPE_UNSIGNED_WORD) {
+            int valueWord = S7.GetWordAt(data, 0);
+            result = new BigDecimal(valueWord);
+        } else if (type == EnumSiemensDataType.TYPE_UNSIGNED_DOUBLE_WORD) {
+            long valueLong = S7.GetDWordAt(data, 0);
+            result = new BigDecimal(valueLong);
+        } else if (type == EnumSiemensDataType.TYPE_REAL) {
+            float valueFloat = S7.GetFloatAt(data, 0);
+            result = new BigDecimal(valueFloat);
+        } else {
+            String args = "тип = " + type + " значение в байт = " + Arrays.toString(data);
+            throw new AppException(TypeException.INVALID_USER_INPUT_DATA, " Не определен тип данных", args, null);
         }
 
-        byte[] resultAnd = new byte[data.length];
-        byte[] maskBytes = appOptions.getBytesMaskOperationAnd();
-        int maskIndex = 0;
-        for (int i = 0; i < data.length; i++) {
-            if (maskIndex >= maskBytes.length)
-                maskIndex = 0;
-            resultAnd[i] = (byte) (data[i] & maskBytes[maskIndex]);
-            maskIndex++;
-        }
-
-        log.info(PREFIX_LOG + " запушено битовое преобразование");
-        BigInteger bigInteger = new BigInteger(resultAnd);
-        BigInteger resultBigInt = bigInteger.divide(appOptions.getBigIntegerDivide());
-        byte[] result = resultBigInt.toByteArray();
-        FormatUtils.formatBytes("Обработанные биты", result, appOptions.getEnumViewFormatType());
+        log.info(PREFIX_LOG + "[Тип: " + type + "] = " + result);
         return result;
     }
 }

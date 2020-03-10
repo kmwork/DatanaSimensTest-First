@@ -10,7 +10,6 @@ import ru.datana.siemensopc.utils.AppException;
 import ru.datana.siemensopc.utils.LanitFileUtils;
 import ru.datana.siemensopc.utils.ValueParser;
 
-import java.math.BigInteger;
 import java.util.Properties;
 
 /**
@@ -65,22 +64,13 @@ public class AppOptions {
     private EnumConnectionMoka7Type enumConnectionMoka7Type;
 
     @Getter
-    private byte[] bytesMaskOperationAnd;
-
-    @Getter
-    private int bitFlipFromIndex;
-
-    @Getter
-    private int bitFlipToIndex;
-
-    @Getter
     private EnumFormatBytesType enumViewFormatType;
 
     @Getter
-    private boolean isActiveBitMode;
+    private EnumSiemensDataType dataType;
 
     @Getter
-    private BigInteger bigIntegerDivide;
+    private int intBitPosition;
 
     public void load() throws AppException {
         Properties p = LanitFileUtils.readDataConfig();
@@ -88,7 +78,9 @@ public class AppOptions {
         ipHost = ValueParser.readPropAsText(p, "host");
         intRack = ValueParser.parseInt(p, "rack");
         intSlot = ValueParser.parseInt(p, "slot");
-        intBytes = ValueParser.parseInt(p, "bytes.count");
+        dataType = ValueParser.readEnum(p, "data.type", EnumSiemensDataType.class, EnumSiemensDataType.values());
+        intBytes = (dataType.getBitCount() + 7) / 8;
+        intBitPosition = ValueParser.parseInt(p, "bit.position");
         intOffset = ValueParser.parseInt(p, "offset.bytes");
         intLoopCount = ValueParser.parseInt(p, "loop.count");
         intS7DBNumber = ValueParser.parseInt(p, "s7.db.number");
@@ -100,9 +92,6 @@ public class AppOptions {
         enumS7DaveAreaType = ValueParser.readEnum(p, "library.s7.area.type", DaveArea.class, DaveArea.values());
         enumConnectionMoka7Type = ValueParser.readEnum(p, "moka7.connection.type", EnumConnectionMoka7Type.class, EnumConnectionMoka7Type.values());
 
-        isActiveBitMode = ValueParser.readBoolean(p, "mode.bits.is.active");
-        bytesMaskOperationAnd = ValueParser.readBytes(p, "bytes.mask.operation.and");
-        bigIntegerDivide = ValueParser.readBigInteger(p, "big.integer.operation.division");
 
         enumViewFormatType = ValueParser.readEnum(p, "view.bytes.type", EnumFormatBytesType.class, EnumFormatBytesType.values());
 

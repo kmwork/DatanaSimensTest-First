@@ -8,7 +8,7 @@
 после сборки мавеном, из папки <this project>/etc для bat и sh командые файлы
 
 ### примерный синтаксис команды
-`java -jar target/Siemens-K4-1.0-SNAPSHOT-jar-with-dependencies.jar -Dapp.dir=<путь к папке config>`
+`java  -Dapp.dir=<путь к папке config> -jar target/Siemens-K4-1.0-SNAPSHOT-jar-with-dependencies.jar`
 
 ## настройка
 файл `datana_siemens.properties` c настройками

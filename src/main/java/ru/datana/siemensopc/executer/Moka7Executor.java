@@ -505,7 +505,7 @@ public class Moka7Executor implements IExecutor {
                         log.error(AppConts.ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
                 }
             } finally {
-                moka7Disconnect
+                moka7Disconnect();
             }
 
 

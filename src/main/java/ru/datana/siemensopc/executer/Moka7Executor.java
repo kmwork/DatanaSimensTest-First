@@ -505,14 +505,21 @@ public class Moka7Executor implements IExecutor {
                         log.error(AppConts.ERROR_LOG_PREFIX + "Не определен режим работы: " + appOptions.getAppWorkMode() + "'");
                 }
             } finally {
-                log.info(AppConts.APP_LOG_PREFIX + " делаем Disconnect");
-                clientS7.Disconnect();
+                moka7Disconnect
             }
 
 
         } catch (Exception e) {
             log.error(AppConts.ERROR_LOG_PREFIX + "Аварийное завершение программы: ", e);
         }
+    }
+
+    private void moka7Disconnect(){
+        String method = "Делаем Disconnect";
+        String prefix = prefixMethod(method);
+        TestBegin(method);
+        clientS7.Disconnect();
+        TestEnd(method, clientS7.Connected ? -1 : 0);
     }
 
     /**

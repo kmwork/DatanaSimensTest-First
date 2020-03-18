@@ -1,5 +1,7 @@
 # Тестовое ПО на проверку  дачтиков сименс
 для контролера Siemens S7 1200 (https://new.siemens.com/ru/ru/produkty/avtomatizacia/sistemy-avtomatizacii/promyshlennye-sistemy-simatic/kontroller-simatic/s7-1200.html)
+сделано по тех заданию: https://conf.dds.lanit.ru/pages/viewpage.action?pageId=43683525
+или файл `NIOKR-43683525-180320-2244-65.pdf` в папке `<this project>/doc-manual`
 
 ## cборка Maven 3 + JDK 8
 `mvn clean compile assembly:single`
